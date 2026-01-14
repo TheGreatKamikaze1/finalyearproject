@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Accessible E-Learning</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <strong>Accessible E-Learning</strong>
+        <div class="smallmuted">Keyboard: <kbd>Tab</kbd> to navigate • <kbd>Enter</kbd> to activate</div>
+      </div>
+      <div class="toolbar" aria-label="User actions">
+        <span id="headerMe" class="smallmuted"></span>
+        <a href="instructor.html">Instructor</a>
+        <button id="logoutBtn" class="hidden">Logout</button>
+      </div>
+    </header>
+
+    <section class="card" aria-label="Accessibility controls">
+      <h2 style="margin-top:0;">Accessibility</h2>
+      <div class="toolbar">
+        <button id="fontMinus">A-</button>
+        <button id="fontPlus">A+</button>
+
+        <label for="contrastSelect" class="smallmuted">Contrast</label>
+        <select id="contrastSelect" aria-label="Contrast mode">
+          <option value="normal">Normal</option>
+          <option value="high">High</option>
+          <option value="dark">Dark</option>
+        </select>
+
+        <label class="smallmuted">
+          <input type="checkbox" id="reduceMotion" />
+          Reduce motion
+        </label>
+
+        <label class="smallmuted">
+          <input type="checkbox" id="ttsEnabled" />
+          Enable TTS button
+        </label>
+      </div>
+      <p class="smallmuted">Settings are saved to your profile.</p>
+    </section>
+
+    <section>
+      <h2>Courses</h2>
+      <div id="status" class="smallmuted"></div>
+      <div id="coursesList" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    (async () => {
+      await requireLogin();
+      await renderHeader();
+      const s = await loadAccessibility();
+
+      // init controls
+      if (s){
+        document.querySelector("#contrastSelect").value = s.contrast_mode;
+        document.querySelector("#reduceMotion").checked = !!s.reduce_motion;
+        document.querySelector("#ttsEnabled").checked = !!s.tts_enabled;
+      }
+
+      const status = document.querySelector("#status");
+      try{
+        await loadCourses(document.querySelector("#coursesList"));
+      }catch(e){
+        setStatus(status, e.message, true);
+      }
+
+      // Accessibility controls -> API updates
+      let fontScale = s?.font_scale ?? 1.0;
+
+      document.querySelector("#fontPlus").onclick = async () => {
+        fontScale = Math.min(2.0, Math.round((fontScale + 0.1) * 10) / 10);
+        await updateAccessibility({ font_scale: fontScale });
+      };
+      document.querySelector("#fontMinus").onclick = async () => {
+        fontScale = Math.max(0.7, Math.round((fontScale - 0.1) * 10) / 10);
+        await updateAccessibility({ font_scale: fontScale });
+      };
+      document.querySelector("#contrastSelect").onchange = async (e) => {
+        await updateAccessibility({ contrast_mode: e.target.value });
+      };
+      document.querySelector("#reduceMotion").onchange = async (e) => {
+        await updateAccessibility({ reduce_motion: e.target.checked });
+      };
+      document.querySelector("#ttsEnabled").onchange = async (e) => {
+        await updateAccessibility({ tts_enabled: e.target.checked });
+      };
+    })();
+  </script>
+</body>
+</html>

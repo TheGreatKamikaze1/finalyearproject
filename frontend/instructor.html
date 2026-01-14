@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Instructor</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <a href="index.html">← Back</a>
+        <div class="smallmuted" id="headerMe"></div>
+      </div>
+      <div class="toolbar">
+        <button id="logoutBtn" class="hidden">Logout</button>
+      </div>
+    </header>
+
+    <main>
+      <div id="instructorOnly" class="smallmuted"></div>
+
+      <section class="card">
+        <h2 style="margin-top:0;">Create course</h2>
+        <form id="createCourse">
+          <div class="row">
+            <div>
+              <label>Course code (optional)</label>
+              <input id="course_code" />
+            </div>
+            <div>
+              <label>Title</label>
+              <input id="course_title" required />
+            </div>
+          </div>
+          <div style="margin-top:12px;">
+            <label>Description</label>
+            <textarea id="course_desc" rows="3"></textarea>
+          </div>
+          <div class="toolbar" style="margin-top:12px;">
+            <button type="submit">Create</button>
+            <span id="courseStatus" class="smallmuted" aria-live="polite"></span>
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2 style="margin-top:0;">Upload material</h2>
+        <form id="createMaterial">
+          <label>Course</label>
+          <select id="courseSelect"></select>
+
+          <div class="row" style="margin-top:12px;">
+            <div>
+              <label>Title</label>
+              <input id="mat_title" required />
+            </div>
+            <div>
+              <label>Type</label>
+              <select id="mat_type">
+                <option value="text">Text</option>
+                <option value="pdf">PDF</option>
+                <option value="video">Video</option>
+                <option value="audio">Audio</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="textWrap" style="margin-top:12px;">
+            <label>Text content</label>
+            <textarea id="mat_text" rows="5"></textarea>
+          </div>
+
+          <div id="urlWrap" class="hidden" style="margin-top:12px;">
+            <label>File URL (pdf/video/audio)</label>
+            <input id="mat_url" placeholder="https://..." />
+            <div class="smallmuted">For school project, using URLs is fine.</div>
+          </div>
+
+          <div class="toolbar" style="margin-top:12px;">
+            <button type="submit">Save material</button>
+            <span id="matStatus" class="smallmuted" aria-live="polite"></span>
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2 style="margin-top:0;">Add captions/transcript (for video)</h2>
+        <form id="addA11y">
+          <label>Material ID</label>
+          <input id="a11y_mat_id" placeholder="Paste a material ID (from DB or inspector)" required />
+
+          <div class="row" style="margin-top:12px;">
+            <div>
+              <label>Kind</label>
+              <select id="a11y_kind">
+                <option value="captions">Captions</option>
+                <option value="transcript">Transcript</option>
+                <option value="audio_description">Audio description</option>
+              </select>
+            </div>
+            <div>
+              <label>Language</label>
+              <input id="a11y_lang" value="en" />
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <label>File URL</label>
+            <input id="a11y_url" placeholder="https://.../captions.vtt" required />
+            <div class="smallmuted">Captions should be .vtt for HTML video track.</div>
+          </div>
+
+          <div class="toolbar" style="margin-top:12px;">
+            <button type="submit">Attach</button>
+            <span id="a11yStatus" class="smallmuted" aria-live="polite"></span>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    (async () => {
+      await requireLogin();
+      await renderHeader();
+      await loadAccessibility();
+
+      const courseSelect = document.querySelector("#courseSelect");
+      await initInstructor(courseSelect);
+
+      // show/hide text/url fields by type
+      const matType = document.querySelector("#mat_type");
+      function syncType(){
+        const t = matType.value;
+        document.querySelector("#textWrap").classList.toggle("hidden", t !== "text");
+        document.querySelector("#urlWrap").classList.toggle("hidden", t === "text");
+      }
+      matType.onchange = syncType;
+      syncType();
+
+      // create course
+      document.querySelector("#createCourse").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const status = document.querySelector("#courseStatus");
+        try{
+          await api("/courses", {
+            method:"POST",
+            body:{
+              course_code: document.querySelector("#course_code").value.trim() || null,
+              title: document.querySelector("#course_title").value.trim(),
+              description: document.querySelector("#course_desc").value.trim() || null
+            }
+          });
+          setStatus(status, "Course created ✅");
+          // reload dropdown
+          const courses = await api("/courses");
+          courseSelect.innerHTML = courses.map(c => `<option value="${escapeAttr(c.id)}">${escapeHtml(c.title)}</option>`).join("");
+        }catch(err){
+          setStatus(status, err.message, true);
+        }
+      });
+
+      // create material
+      document.querySelector("#createMaterial").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const status = document.querySelector("#matStatus");
+        try{
+          const t = matType.value;
+          const body = {
+            title: document.querySelector("#mat_title").value.trim(),
+            material_type: t,
+            content_text: t === "text" ? (document.querySelector("#mat_text").value || null) : null,
+            file_url: t !== "text" ? (document.querySelector("#mat_url").value.trim() || null) : null
+          };
+          const m = await api(`/courses/${courseSelect.value}/materials`, { method:"POST", body });
+          setStatus(status, `Saved ✅ Material ID: ${m.id}`);
+        }catch(err){
+          setStatus(status, err.message, true);
+        }
+      });
+
+      // add captions/transcript
+      document.querySelector("#addA11y").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const status = document.querySelector("#a11yStatus");
+        try{
+          await api(`/materials/${document.querySelector("#a11y_mat_id").value.trim()}/accessibility`, {
+            method:"POST",
+            body:{
+              kind: document.querySelector("#a11y_kind").value,
+              language: document.querySelector("#a11y_lang").value.trim() || "en",
+              file_url: document.querySelector("#a11y_url").value.trim()
+            }
+          });
+          setStatus(status, "Attached ✅");
+        }catch(err){
+          setStatus(status, err.message, true);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

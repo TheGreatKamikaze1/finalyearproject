@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Course</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <a href="index.html">← Back</a>
+        <div class="smallmuted" id="headerMe"></div>
+      </div>
+      <div class="toolbar">
+        <button id="logoutBtn" class="hidden">Logout</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="card">
+        <h1 id="courseTitle" style="margin-top:0;"></h1>
+        <p id="courseDesc" class="smallmuted"></p>
+      </section>
+
+      <section>
+        <h2>Materials</h2>
+        <div id="materialsWrap" aria-live="polite"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    (async () => {
+      await requireLogin();
+      await renderHeader();
+      await loadAccessibility();
+
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      if (!id){ alert("Missing course id"); window.location.href = "index.html"; return; }
+
+      try{
+        await loadCoursePage(id);
+      }catch(e){
+        alert(e.message);
+        window.location.href = "index.html";
+      }
+    })();
+  </script>
+</body>
+</html>

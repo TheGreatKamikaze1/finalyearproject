@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Register</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <strong>Register</strong>
+      <nav>
+        <a href="login.html">Login</a>
+      </nav>
+    </header>
+
+    <main class="card">
+      <form id="form" aria-label="Registration form">
+        <div class="row">
+          <div>
+            <label for="full_name">Full name</label>
+            <input id="full_name" required />
+          </div>
+          <div>
+            <label for="role">Role</label>
+            <select id="role">
+              <option value="student">Student</option>
+              <option value="instructor">Instructor</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+          <div>
+            <label for="email">Email</label>
+            <input id="email" type="email" required autocomplete="email" />
+          </div>
+          <div>
+            <label for="password">Password</label>
+            <input id="password" type="password" required minlength="6" />
+          </div>
+        </div>
+
+        <div class="toolbar" style="margin-top:12px;">
+          <button type="submit">Create account</button>
+          <span id="status" class="smallmuted" aria-live="polite"></span>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    document.querySelector("#form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const status = document.querySelector("#status");
+      try{
+        const data = await api("/auth/register", {
+          method: "POST",
+          auth: false,
+          body: {
+            full_name: document.querySelector("#full_name").value.trim(),
+            role: document.querySelector("#role").value,
+            email: document.querySelector("#email").value.trim(),
+            password: document.querySelector("#password").value
+          }
+        });
+        setToken(data.access_token);
+        await loadAccessibility();
+        window.location.href = "index.html";
+      }catch(err){
+        setStatus(status, err.message, true);
+      }
+    });
+  </script>
+</body>
+</html>
