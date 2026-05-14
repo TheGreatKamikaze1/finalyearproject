@@ -6,15 +6,21 @@
   <title>Instructor</title>
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
-<body>
-  <div class="container">
-    <header>
-      <div>
-        <a href="index.html">&larr; Back</a>
-        <div class="smallmuted" id="headerMe"></div>
-      </div>
-      <div class="toolbar">
-        <button id="logoutBtn" class="hidden">Logout</button>
+<body class="app-body">
+  <div class="app-shell">
+    <header class="app-header">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">A</span>
+        <span>AccessLearn</span>
+      </a>
+      <nav class="main-nav" aria-label="Primary navigation">
+        <a href="index.html">Student dashboard</a>
+        <a href="instructor.html">Instructor studio</a>
+        <a href="index.html#accessibility">Accessibility</a>
+      </nav>
+      <div class="toolbar" aria-label="User actions">
+        <span id="headerMe" class="smallmuted"></span>
+        <button id="logoutBtn" class="hidden" type="button">Logout</button>
       </div>
     </header>
 
@@ -25,11 +31,16 @@
         <div class="section-heading">
           <div>
             <p class="eyebrow-text">Instructor studio</p>
-            <h1>Course management</h1>
+            <h1>Build and publish accessible courses</h1>
           </div>
           <button id="demoCourseBtn" type="button">Create demo course</button>
         </div>
-        <p class="smallmuted">Create courses, publish them for students, and attach accessible learning materials.</p>
+        <div class="builder-steps" aria-label="Course builder workflow">
+          <a href="#courseDetails"><span>1</span> Course details</a>
+          <a href="#courseMaterials"><span>2</span> Materials</a>
+          <a href="#accessResources"><span>3</span> Accessibility resources</a>
+          <a href="#publishCourses"><span>4</span> Publish</a>
+        </div>
         <div id="instructorStats" class="stats-grid compact-stats" aria-label="Instructor summary">
           <div class="stat-card">
             <span class="smallmuted">Courses</span>
@@ -46,8 +57,8 @@
         </div>
       </section>
 
-      <section class="card instructor-panel">
-        <h2 style="margin-top:0;">Create course</h2>
+      <section id="courseDetails" class="card instructor-panel">
+        <h2 style="margin-top:0;">Create a course</h2>
         <form id="createCourse">
           <div class="row">
             <div>
@@ -65,12 +76,16 @@
           </div>
           <div class="toolbar" style="margin-top:12px;">
             <button type="submit">Create</button>
+            <label class="inline-check">
+              <input type="checkbox" id="publishNow" />
+              Publish after creating
+            </label>
             <span id="courseStatus" class="smallmuted" aria-live="polite"></span>
           </div>
         </form>
       </section>
 
-      <section class="card instructor-panel">
+      <section id="publishCourses" class="card instructor-panel">
         <div class="section-heading">
           <div>
             <p class="eyebrow-text">Publishing</p>
@@ -80,11 +95,19 @@
         <div id="courseManager" class="course-grid" aria-live="polite"></div>
       </section>
 
-      <section class="card instructor-panel">
-        <h2 style="margin-top:0;">Upload material</h2>
+      <section id="courseMaterials" class="card instructor-panel">
+        <h2 style="margin-top:0;">Add learning material</h2>
         <form id="createMaterial">
-          <label>Course</label>
-          <select id="courseSelect"></select>
+          <div class="row">
+            <div>
+              <label for="courseSelect">Course</label>
+              <select id="courseSelect"></select>
+            </div>
+            <div>
+              <label>Selected course status</label>
+              <div id="selectedCourseStatus" class="selected-course-status"></div>
+            </div>
+          </div>
 
           <div class="row" style="margin-top:12px;">
             <div>
@@ -130,7 +153,7 @@
         <div id="selectedMaterials" class="material-list"></div>
       </section>
 
-      <section class="card instructor-panel">
+      <section id="accessResources" class="card instructor-panel">
         <h2 style="margin-top:0;">Add captions/transcript (for video)</h2>
         <form id="addA11y">
           <label>Material ID</label>
@@ -170,7 +193,7 @@
   <script src="assets/app.js"></script>
   <script>
     (async () => {
-      await requireLogin();
+      if (!await requireLogin()) return;
       await renderHeader();
       await loadAccessibility();
 
@@ -194,7 +217,7 @@
         e.preventDefault();
         const status = document.querySelector("#courseStatus");
         try{
-          await api("/courses", {
+          const created = await api("/courses", {
             method:"POST",
             body:{
               course_code: document.querySelector("#course_code").value.trim() || null,
@@ -202,15 +225,20 @@
               description: document.querySelector("#course_desc").value.trim() || null
             }
           });
-          setStatus(status, "Course created.");
+          if (document.querySelector("#publishNow").checked){
+            await api(`/courses/${created.id}`, { method: "PATCH", body: { is_published: true } });
+          }
+          setStatus(status, document.querySelector("#publishNow").checked ? "Course created and published." : "Course created as draft.");
           document.querySelector("#createCourse").reset();
-          await refreshInstructorWorkspace();
+          await refreshInstructorWorkspace(created.id);
         }catch(err){
           setStatus(status, err.message, true);
         }
       });
 
       courseSelect.addEventListener("change", async () => {
+        const courses = await api("/courses");
+        renderSelectedCourseStatus(courses.find(course => course.id === courseSelect.value) || null);
         await renderSelectedMaterials(courseSelect.value);
       });
 

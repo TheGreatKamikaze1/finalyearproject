@@ -143,18 +143,23 @@ if (document.readyState === "loading"){
 async function renderHeader(){
   const headerMe = qs("#headerMe");
   const logoutBtn = qs("#logoutBtn");
+  const instructorLinks = qsa("[data-instructor-link]");
   if (!headerMe) return;
 
   const t = getToken();
   if (!t){
     headerMe.textContent = "Not logged in";
     if (logoutBtn) logoutBtn.classList.add("hidden");
+    instructorLinks.forEach(link => link.classList.add("hidden"));
     return;
   }
 
   try{
     const me = await getMe();
     headerMe.textContent = `${me.full_name} (${me.role})`;
+    instructorLinks.forEach(link => {
+      link.classList.toggle("hidden", !["instructor", "admin"].includes(me.role));
+    });
     if (logoutBtn){
       logoutBtn.classList.remove("hidden");
       logoutBtn.onclick = () => {
@@ -162,13 +167,133 @@ async function renderHeader(){
         window.location.href = "login.html";
       };
     }
+    return me;
   }catch{
     headerMe.textContent = "Session invalid";
     if (logoutBtn) logoutBtn.classList.add("hidden");
+    instructorLinks.forEach(link => link.classList.add("hidden"));
   }
 }
 
+function redirectForRole(me){
+  if (["instructor", "admin"].includes(me.role)){
+    window.location.href = "instructor.html";
+    return;
+  }
+  window.location.href = "index.html";
+}
+
+function initAccessibilityControls(settings){
+  if (!qs("#contrastSelect")) return;
+
+  if (settings){
+    qs("#contrastSelect").value = settings.contrast_mode;
+    qs("#reduceMotion").checked = !!settings.reduce_motion;
+    qs("#ttsEnabled").checked = !!settings.tts_enabled;
+    qs("#dyslexiaFriendly").checked = !!settings.dyslexia_friendly;
+  }
+
+  let fontScale = settings?.font_scale ?? 1.0;
+  const updateFontBadge = () => {
+    const el = qs("#fontScaleValue");
+    if (el) el.textContent = `Font ${Math.round(fontScale * 100)}%`;
+  };
+  updateFontBadge();
+
+  qs("#fontPlus").onclick = async () => {
+    fontScale = Math.min(2.0, Math.round((fontScale + 0.1) * 10) / 10);
+    await updateAccessibility({ font_scale: fontScale });
+    updateFontBadge();
+  };
+  qs("#fontMinus").onclick = async () => {
+    fontScale = Math.max(0.7, Math.round((fontScale - 0.1) * 10) / 10);
+    await updateAccessibility({ font_scale: fontScale });
+    updateFontBadge();
+  };
+  qs("#contrastSelect").onchange = async (e) => updateAccessibility({ contrast_mode: e.target.value });
+  qs("#reduceMotion").onchange = async (e) => updateAccessibility({ reduce_motion: e.target.checked });
+  qs("#ttsEnabled").onchange = async (e) => updateAccessibility({ tts_enabled: e.target.checked });
+  qs("#dyslexiaFriendly").onchange = async (e) => updateAccessibility({ dyslexia_friendly: e.target.checked });
+}
+
 // ====== COURSES ======
+async function loadStudentDashboard(me){
+  if (["instructor", "admin"].includes(me.role)){
+    window.location.href = "instructor.html";
+    return;
+  }
+
+  const [courses, enrolledCourses, progress] = await Promise.all([
+    api("/courses"),
+    api("/courses/me/enrollments"),
+    api("/progress/me"),
+  ]);
+  const enrolledIds = new Set(enrolledCourses.map(course => course.id));
+
+  qs("#enrolledCount").textContent = enrolledCourses.length;
+  qs("#completedCount").textContent = progress.filter(x => x.status === "completed").length;
+  qs("#progressCount").textContent = progress.filter(x => x.status === "in_progress").length;
+  qs("#courseCount").textContent = `${courses.length} ${courses.length === 1 ? "course" : "courses"}`;
+
+  renderCourseCollection(qs("#enrolledCourses"), enrolledCourses, {
+    mode: "enrolled",
+    emptyTitle: "You have not enrolled in any course yet",
+    emptyText: "Browse the course catalog below and enroll in a published course to start learning.",
+  });
+
+  renderCourseCollection(qs("#coursesList"), courses, {
+    mode: "catalog",
+    enrolledIds,
+    emptyTitle: "No published courses yet",
+    emptyText: "Ask an instructor to publish a course, or use the instructor studio to create demo content.",
+  });
+}
+
+function renderCourseCollection(container, courses, options = {}){
+  const { mode = "catalog", enrolledIds = new Set(), emptyTitle, emptyText } = options;
+  container.innerHTML = "";
+
+  if (!courses.length){
+    container.innerHTML = `
+      <div class="empty-state">
+        <strong>${escapeHtml(emptyTitle || "No courses found")}</strong>
+        <p class="smallmuted">${escapeHtml(emptyText || "Courses will appear here when they are available.")}</p>
+      </div>
+    `;
+    return;
+  }
+
+  courses.forEach(course => {
+    const enrolled = enrolledIds.has(course.id) || mode === "enrolled";
+    const card = document.createElement("article");
+    card.className = "course-card learning-card";
+    card.innerHTML = `
+      <div class="course-card-top">
+        <span class="badge">${escapeHtml(course.course_code || "Course")}</span>
+        <span class="badge ${enrolled ? "badge-success" : "badge-muted"}">${enrolled ? "Enrolled" : "Available"}</span>
+      </div>
+      <h3>${escapeHtml(course.title)}</h3>
+      <p>${escapeHtml(course.description || "No description has been added for this course.")}</p>
+      <div class="toolbar">
+        ${mode === "catalog" && !enrolled ? `<button type="button" data-enroll="${escapeAttr(course.id)}">Enroll</button>` : ""}
+        <a class="button-link secondary" href="course.html?id=${encodeURIComponent(course.id)}">${enrolled ? "Continue learning" : "View course"}</a>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  qsa("button[data-enroll]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      try{
+        await api(`/courses/${btn.dataset.enroll}/enroll`, { method:"POST" });
+        await loadStudentDashboard(await getMe());
+      }catch(e){
+        alert(e.message);
+      }
+    });
+  });
+}
+
 async function loadCourses(listEl){
   const me = await getMe();
   const courses = await api("/courses");
@@ -234,9 +359,30 @@ async function loadCoursePage(courseId){
   qs("#coursePublished").textContent = course.is_published ? "Published" : "Draft";
   qs("#coursePublished").classList.toggle("badge-success", !!course.is_published);
 
-  const mats = await api(`/courses/${courseId}/materials`);
   const wrap = qs("#materialsWrap");
   wrap.innerHTML = "";
+  let mats = [];
+  try{
+    mats = await api(`/courses/${courseId}/materials`);
+  }catch(e){
+    wrap.innerHTML = `
+      <div class="empty-state">
+        <strong>Enroll to access course materials</strong>
+        <p class="smallmuted">This course is available, but materials are unlocked after enrollment.</p>
+        <div class="toolbar" style="margin-top:12px;">
+          <button type="button" id="courseEnrollBtn">Enroll in course</button>
+        </div>
+      </div>
+    `;
+    const enrollBtn = qs("#courseEnrollBtn");
+    if (enrollBtn){
+      enrollBtn.onclick = async () => {
+        await api(`/courses/${courseId}/enroll`, { method: "POST" });
+        await loadCoursePage(courseId);
+      };
+    }
+    return;
+  }
 
   if (!mats.length){
     wrap.innerHTML = `
@@ -261,7 +407,7 @@ async function loadCoursePage(courseId){
         <button data-progress="${m.id}" data-status="in_progress">Mark in progress</button>
         <button data-progress="${m.id}" data-status="completed">Mark completed</button>
       </div>
-      <div id="viewer-${m.id}" class="hidden" style="margin-top:10px;"></div>
+      <div id="viewer-${m.id}" class="material-viewer hidden"></div>
     `;
     wrap.appendChild(card);
   });
@@ -376,6 +522,7 @@ async function refreshInstructorWorkspace(selectedCourseId=null){
   qs("#instructorDraftCount").textContent = courses.filter(c => !c.is_published).length;
 
   renderCourseManager(courses);
+  renderSelectedCourseStatus(courses.find(course => course.id === courseSelect.value) || null);
   await renderSelectedMaterials(courseSelect.value);
 }
 
@@ -416,6 +563,8 @@ function renderCourseManager(courses){
   qsa("[data-select-course]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       qs("#courseSelect").value = btn.dataset.selectCourse;
+      const courses = await api("/courses");
+      renderSelectedCourseStatus(courses.find(course => course.id === btn.dataset.selectCourse) || null);
       await renderSelectedMaterials(btn.dataset.selectCourse);
     });
   });
@@ -438,8 +587,8 @@ async function renderSelectedMaterials(courseId){
   if (!courseId){
     wrap.innerHTML = `
       <div class="empty-state">
-        <strong>Select or create a course</strong>
-        <p class="smallmuted">Materials will appear here after you choose a course.</p>
+        <strong>No course selected</strong>
+        <p class="smallmuted">Choose a course from the material form or create a new course.</p>
       </div>
     `;
     return;
@@ -450,7 +599,7 @@ async function renderSelectedMaterials(courseId){
     wrap.innerHTML = `
       <div class="empty-state">
         <strong>No materials yet</strong>
-        <p class="smallmuted">Add text, PDF, audio, or video content. Video materials can include captions and transcripts.</p>
+        <p class="smallmuted">Add text, PDF, audio, or video content from the material form.</p>
       </div>
     `;
     return;
@@ -487,6 +636,19 @@ async function renderSelectedMaterials(courseId){
       await renderSelectedMaterials(qs("#courseSelect").value);
     });
   });
+}
+
+function renderSelectedCourseStatus(course){
+  const wrap = qs("#selectedCourseStatus");
+  if (!wrap) return;
+  if (!course){
+    wrap.innerHTML = `<span class="badge badge-muted">No course selected</span>`;
+    return;
+  }
+  wrap.innerHTML = `
+    <span class="badge">${escapeHtml(course.course_code || "Course")}</span>
+    <span class="badge ${course.is_published ? "badge-success" : "badge-muted"}">${course.is_published ? "Published" : "Draft"}</span>
+  `;
 }
 
 async function createDemoCourse(){

@@ -67,7 +67,7 @@
         });
         setToken(data.access_token);
         await loadAccessibility();
-        window.location.href = "index.html";
+        redirectForRole(await getMe());
       }catch(err){
         setStatus(status, err.message, true);
       }finally{

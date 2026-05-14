@@ -6,15 +6,22 @@
   <title>Course</title>
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
-<body>
-  <div class="container">
-    <header>
-      <div>
-        <a href="index.html">&larr; Back</a>
-        <div class="smallmuted" id="headerMe"></div>
-      </div>
-      <div class="toolbar">
-        <button id="logoutBtn" class="hidden">Logout</button>
+<body class="app-body">
+  <div class="app-shell">
+    <header class="app-header">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">A</span>
+        <span>AccessLearn</span>
+      </a>
+      <nav class="main-nav" aria-label="Primary navigation">
+        <a href="index.html">Dashboard</a>
+        <a href="index.html#my-learning">My learning</a>
+        <a href="index.html#catalog">Courses</a>
+        <a href="index.html#accessibility">Accessibility</a>
+      </nav>
+      <div class="toolbar" aria-label="User actions">
+        <span id="headerMe" class="smallmuted"></span>
+        <button id="logoutBtn" class="hidden" type="button">Logout</button>
       </div>
     </header>
 
@@ -33,7 +40,7 @@
         <div class="section-heading">
           <div>
             <p class="eyebrow-text">Accessible content</p>
-            <h2>Materials</h2>
+            <h2>Course materials</h2>
           </div>
         </div>
         <div id="materialsWrap" class="material-list" aria-live="polite"></div>
@@ -45,7 +52,7 @@
   <script src="assets/app.js"></script>
   <script>
     (async () => {
-      await requireLogin();
+      if (!await requireLogin()) return;
       await renderHeader();
       await loadAccessibility();
 

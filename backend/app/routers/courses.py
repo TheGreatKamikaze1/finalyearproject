@@ -35,6 +35,17 @@ def create_course(payload: CourseCreate, db: Session = Depends(get_db), user: Us
     db.refresh(c)
     return CourseOut(**c.__dict__)
 
+@router.get("/me/enrollments", response_model=list[CourseOut])
+def my_enrolled_courses(db: Session = Depends(get_db), user: User = Depends(require_roles("student", "admin"))):
+    courses = (
+        db.query(Course)
+        .join(Enrollment, Enrollment.course_id == Course.id)
+        .filter(Enrollment.student_id == user.id)
+        .order_by(Course.created_at.desc())
+        .all()
+    )
+    return [CourseOut(**c.__dict__) for c in courses]
+
 @router.get("/{course_id}", response_model=CourseOut)
 def get_course(course_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     c = db.get(Course, course_id)

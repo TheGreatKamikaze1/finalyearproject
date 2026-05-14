@@ -41,6 +41,56 @@ a:hover{ text-decoration: underline; }
   padding: 18px;
 }
 
+.app-body{
+  background: #f6f7f4;
+}
+
+.app-shell{
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 18px;
+}
+
+.app-header{
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(246, 247, 244, 0.96);
+  backdrop-filter: blur(12px);
+}
+
+.brand{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--fg);
+  font-weight: 900;
+}
+
+.brand:hover{
+  text-decoration: none;
+}
+
+.main-nav{
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.main-nav a{
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.main-nav a:hover{
+  background: var(--surface);
+  color: var(--fg);
+  text-decoration: none;
+}
+
 header{
   display:flex;
   gap:12px;
@@ -102,6 +152,34 @@ button:disabled{
   opacity: 0.68;
 }
 
+.button-link{
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  background: var(--primary);
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.button-link:hover{
+  background: var(--primary-strong);
+  text-decoration: none;
+}
+
+.button-link.secondary{
+  background: var(--surface);
+  color: var(--fg);
+  border-color: var(--border);
+}
+
+.button-link.secondary:hover{
+  background: #e2ece8;
+}
+
 input[type="checkbox"]{
   width: auto;
   min-width: 18px;
@@ -146,6 +224,46 @@ kbd{
 .hidden{ display:none; }
 
 .is-error{ color: var(--danger) !important; }
+
+.page-hero{
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+  gap: 24px;
+  align-items: stretch;
+  padding: 36px 0 22px;
+}
+
+.page-hero h1{
+  margin: 0 0 12px;
+  max-width: 760px;
+  font-size: clamp(2.2rem, 5vw, 4.2rem);
+  line-height: 1;
+}
+
+.page-hero p{
+  max-width: 760px;
+  color: var(--muted);
+  font-size: 1.08rem;
+}
+
+.hero-panel{
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  padding: 22px;
+  background: var(--primary-strong);
+  color: #ffffff;
+  border-radius: 8px;
+}
+
+.hero-panel ul{
+  margin: 0;
+  padding-left: 20px;
+}
+
+.content-section{
+  margin: 26px 0;
+}
 
 .section-heading{
   display: flex;
@@ -252,6 +370,58 @@ kbd{
   cursor: pointer;
 }
 
+.inline-check{
+  display: inline-flex;
+  width: auto;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.builder-steps{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.builder-steps a{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--fg);
+  font-weight: 900;
+}
+
+.builder-steps a:hover{
+  background: #e2ece8;
+  text-decoration: none;
+}
+
+.builder-steps span{
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.selected-course-status{
+  display: flex;
+  min-height: 45px;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .course-grid{
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -307,6 +477,17 @@ kbd{
 
 .material-card p{
   margin: 8px 0 0;
+}
+
+.material-viewer{
+  grid-column: 1 / -1;
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.learning-card{
+  min-height: 250px;
 }
 
 .empty-state{
@@ -520,6 +701,15 @@ body.contrast-dark .auth-visual{
     #081a18;
 }
 
+body.contrast-dark .app-header{
+  background: rgba(12, 17, 16, 0.96);
+}
+
+body.contrast-dark .button-link.secondary{
+  background: var(--surface);
+  color: var(--fg);
+}
+
 body.reduce-motion *{
   scroll-behavior: auto !important;
   transition: none !important;
@@ -552,12 +742,22 @@ body.dyslexia-friendly li{
 
   .control-grid,
   .course-grid,
-  .stats-grid{
+  .stats-grid,
+  .builder-steps,
+  .page-hero{
     grid-template-columns: 1fr;
   }
 
   .material-card{
     grid-template-columns: 1fr;
+  }
+
+  .app-header{
+    align-items: flex-start;
+  }
+
+  .main-nav{
+    justify-content: flex-start;
   }
 }
 

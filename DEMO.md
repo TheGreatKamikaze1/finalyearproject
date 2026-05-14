@@ -4,16 +4,16 @@ Project title: **Design and Implementation of an E-Learning Platform for Student
 
 ## What To Show
 
-1. Register as an instructor.
-2. Open the instructor studio.
-3. Click **Create demo course**.
-4. Show that the course is published and has multiple learning materials.
-5. Register as a student in another browser/session.
-6. Show the student dashboard, accessibility controls, and published course catalog.
-7. Enroll in the demo course.
-8. Open a text lesson and use **Read aloud**.
+1. Register as an instructor. The app takes instructors directly to the **Instructor studio**.
+2. Click **Create demo course**.
+3. Show the course-management area: course count, published/draft status, selected course materials, and publish controls.
+4. Register as a student in another browser/session. The app takes students to the **Learning dashboard**.
+5. Show the dashboard sections: **My learning**, **Course catalog**, and **Accessibility tools**.
+6. Enroll in the demo course from the catalog.
+7. Open the course and show the text lesson, audio resource, and progress actions.
+8. Use **Read aloud** on a text lesson.
 9. Mark a material as in progress or completed.
-10. Show that accessibility preferences are saved to the user profile.
+10. Change contrast, text size, reduced motion, and dyslexia-friendly reading mode to show disability-focused personalization.
 
 ## Features Already Implemented
 
