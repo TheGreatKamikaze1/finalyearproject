@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 class MaterialCreate(BaseModel):
@@ -19,7 +21,7 @@ class MaterialOut(BaseModel):
     material_type: str
     content_text: str | None
     file_url: str | None
-    created_at: str
+    created_at: datetime
 
 class MaterialAccessibilityCreate(BaseModel):
     kind: str  # captions/transcript/audio_description
@@ -32,4 +34,4 @@ class MaterialAccessibilityOut(BaseModel):
     kind: str
     language: str
     file_url: str
-    created_at: str
+    created_at: datetime

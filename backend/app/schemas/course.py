@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 class CourseCreate(BaseModel):
@@ -18,4 +20,4 @@ class CourseOut(BaseModel):
     title: str
     description: str | None
     is_published: bool
-    created_at: str
+    created_at: datetime

@@ -3,26 +3,35 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Register</title>
+  <title>Register | Accessible E-Learning</title>
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
-<body>
-  <div class="container">
-    <header>
-      <strong>Register</strong>
-      <nav>
-        <a href="login.html">Login</a>
-      </nav>
-    </header>
+<body class="auth-body">
+  <main class="auth-shell">
+    <section class="auth-visual" aria-label="Accessible E-Learning">
+      <div class="auth-brand">
+        <span class="brand-mark">A</span>
+        <span>Accessible E-Learning</span>
+      </div>
+      <img class="auth-illustration" src="assets/auth-visual.svg" alt="" />
+      <div class="auth-copy">
+        <p class="eyebrow">New account</p>
+        <h1>Start learning clearly</h1>
+        <p>Create a profile for courses, accessible materials, and progress tracking.</p>
+      </div>
+    </section>
 
-    <main class="card">
-      <form id="form" aria-label="Registration form">
+    <section class="auth-panel" aria-labelledby="registerTitle">
+      <h2 id="registerTitle">Create account</h2>
+      <p class="auth-lede">Choose the role that matches how you will use the portal.</p>
+
+      <form id="form" class="auth-form" aria-label="Registration form">
         <div class="row">
-          <div>
+          <div class="field">
             <label for="full_name">Full name</label>
-            <input id="full_name" required />
+            <input id="full_name" required autocomplete="name" placeholder="Your name" />
           </div>
-          <div>
+          <div class="field">
             <label for="role">Role</label>
             <select id="role">
               <option value="student">Student</option>
@@ -31,31 +40,38 @@
           </div>
         </div>
 
-        <div class="row" style="margin-top:12px;">
-          <div>
+        <div class="row">
+          <div class="field">
             <label for="email">Email</label>
-            <input id="email" type="email" required autocomplete="email" />
+            <input id="email" type="text" inputmode="email" required autocomplete="email" placeholder="you@example.com" />
           </div>
-          <div>
+          <div class="field">
             <label for="password">Password</label>
-            <input id="password" type="password" required minlength="6" />
+            <div class="password-field">
+              <input id="password" type="password" required minlength="6" autocomplete="new-password" />
+              <button type="button" class="password-toggle" data-toggle-password aria-controls="password" aria-pressed="false">Show</button>
+            </div>
           </div>
         </div>
 
-        <div class="toolbar" style="margin-top:12px;">
-          <button type="submit">Create account</button>
-          <span id="status" class="smallmuted" aria-live="polite"></span>
-        </div>
+        <button id="submitBtn" class="auth-submit" type="submit">Create account</button>
+        <p id="status" class="auth-status smallmuted" aria-live="polite"></p>
       </form>
-    </main>
-  </div>
 
+      <p class="auth-switch">Already have an account? <a href="login.html">Sign in</a></p>
+    </section>
+  </main>
+
+  <script src="assets/config.js"></script>
   <script src="assets/app.js"></script>
   <script>
     document.querySelector("#form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const status = document.querySelector("#status");
+      const submitBtn = document.querySelector("#submitBtn");
       try{
+        submitBtn.disabled = true;
+        setStatus(status, "Creating account...");
         const data = await api("/auth/register", {
           method: "POST",
           auth: false,
@@ -71,6 +87,8 @@
         window.location.href = "index.html";
       }catch(err){
         setStatus(status, err.message, true);
+      }finally{
+        submitBtn.disabled = false;
       }
     });
   </script>

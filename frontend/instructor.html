@@ -10,7 +10,7 @@
   <div class="container">
     <header>
       <div>
-        <a href="index.html">← Back</a>
+        <a href="index.html">&larr; Back</a>
         <div class="smallmuted" id="headerMe"></div>
       </div>
       <div class="toolbar">
@@ -21,7 +21,32 @@
     <main>
       <div id="instructorOnly" class="smallmuted"></div>
 
-      <section class="card">
+      <section class="card instructor-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow-text">Instructor studio</p>
+            <h1>Course management</h1>
+          </div>
+          <button id="demoCourseBtn" type="button">Create demo course</button>
+        </div>
+        <p class="smallmuted">Create courses, publish them for students, and attach accessible learning materials.</p>
+        <div id="instructorStats" class="stats-grid compact-stats" aria-label="Instructor summary">
+          <div class="stat-card">
+            <span class="smallmuted">Courses</span>
+            <strong id="instructorCourseCount">0</strong>
+          </div>
+          <div class="stat-card">
+            <span class="smallmuted">Published</span>
+            <strong id="instructorPublishedCount">0</strong>
+          </div>
+          <div class="stat-card">
+            <span class="smallmuted">Draft</span>
+            <strong id="instructorDraftCount">0</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="card instructor-panel">
         <h2 style="margin-top:0;">Create course</h2>
         <form id="createCourse">
           <div class="row">
@@ -45,7 +70,17 @@
         </form>
       </section>
 
-      <section class="card">
+      <section class="card instructor-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow-text">Publishing</p>
+            <h2>Your courses</h2>
+          </div>
+        </div>
+        <div id="courseManager" class="course-grid" aria-live="polite"></div>
+      </section>
+
+      <section class="card instructor-panel">
         <h2 style="margin-top:0;">Upload material</h2>
         <form id="createMaterial">
           <label>Course</label>
@@ -85,7 +120,17 @@
         </form>
       </section>
 
-      <section class="card">
+      <section class="card instructor-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow-text">Content library</p>
+            <h2>Materials in selected course</h2>
+          </div>
+        </div>
+        <div id="selectedMaterials" class="material-list"></div>
+      </section>
+
+      <section class="card instructor-panel">
         <h2 style="margin-top:0;">Add captions/transcript (for video)</h2>
         <form id="addA11y">
           <label>Material ID</label>
@@ -121,6 +166,7 @@
     </main>
   </div>
 
+  <script src="assets/config.js"></script>
   <script src="assets/app.js"></script>
   <script>
     (async () => {
@@ -129,7 +175,9 @@
       await loadAccessibility();
 
       const courseSelect = document.querySelector("#courseSelect");
-      await initInstructor(courseSelect);
+      const canManage = await initInstructor(courseSelect);
+      if (!canManage) return;
+      await refreshInstructorWorkspace();
 
       // show/hide text/url fields by type
       const matType = document.querySelector("#mat_type");
@@ -154,13 +202,16 @@
               description: document.querySelector("#course_desc").value.trim() || null
             }
           });
-          setStatus(status, "Course created ✅");
-          // reload dropdown
-          const courses = await api("/courses");
-          courseSelect.innerHTML = courses.map(c => `<option value="${escapeAttr(c.id)}">${escapeHtml(c.title)}</option>`).join("");
+          setStatus(status, "Course created.");
+          document.querySelector("#createCourse").reset();
+          await refreshInstructorWorkspace();
         }catch(err){
           setStatus(status, err.message, true);
         }
+      });
+
+      courseSelect.addEventListener("change", async () => {
+        await renderSelectedMaterials(courseSelect.value);
       });
 
       // create material
@@ -176,7 +227,10 @@
             file_url: t !== "text" ? (document.querySelector("#mat_url").value.trim() || null) : null
           };
           const m = await api(`/courses/${courseSelect.value}/materials`, { method:"POST", body });
-          setStatus(status, `Saved ✅ Material ID: ${m.id}`);
+          setStatus(status, `Saved. Material ID: ${m.id}`);
+          document.querySelector("#createMaterial").reset();
+          syncType();
+          await renderSelectedMaterials(courseSelect.value);
         }catch(err){
           setStatus(status, err.message, true);
         }
@@ -195,7 +249,21 @@
               file_url: document.querySelector("#a11y_url").value.trim()
             }
           });
-          setStatus(status, "Attached ✅");
+          setStatus(status, "Attached.");
+          document.querySelector("#addA11y").reset();
+          document.querySelector("#a11y_lang").value = "en";
+        }catch(err){
+          setStatus(status, err.message, true);
+        }
+      });
+
+      document.querySelector("#demoCourseBtn").addEventListener("click", async () => {
+        const status = document.querySelector("#courseStatus");
+        try{
+          setStatus(status, "Creating demo course...");
+          const course = await createDemoCourse();
+          setStatus(status, "Demo course created and published.");
+          await refreshInstructorWorkspace(course.id);
         }catch(err){
           setStatus(status, err.message, true);
         }

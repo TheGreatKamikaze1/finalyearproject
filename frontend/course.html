@@ -10,7 +10,7 @@
   <div class="container">
     <header>
       <div>
-        <a href="index.html">← Back</a>
+        <a href="index.html">&larr; Back</a>
         <div class="smallmuted" id="headerMe"></div>
       </div>
       <div class="toolbar">
@@ -20,17 +20,28 @@
 
     <main>
       <section class="card">
+        <p class="eyebrow-text">Course workspace</p>
         <h1 id="courseTitle" style="margin-top:0;"></h1>
         <p id="courseDesc" class="smallmuted"></p>
+        <div class="toolbar">
+          <span id="courseCode" class="badge"></span>
+          <span id="coursePublished" class="badge"></span>
+        </div>
       </section>
 
       <section>
-        <h2>Materials</h2>
-        <div id="materialsWrap" aria-live="polite"></div>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow-text">Accessible content</p>
+            <h2>Materials</h2>
+          </div>
+        </div>
+        <div id="materialsWrap" class="material-list" aria-live="polite"></div>
       </section>
     </main>
   </div>
 
+  <script src="assets/config.js"></script>
   <script src="assets/app.js"></script>
   <script>
     (async () => {

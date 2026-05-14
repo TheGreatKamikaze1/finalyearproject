@@ -1,3 +1,4 @@
+from datetime import datetime
 import uuid
 from sqlalchemy import String, DateTime, func, Text, Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -14,7 +15,7 @@ class Material(Base):
     material_type: Mapped[str] = mapped_column(Enum("text", "pdf", "video", "audio", name="material_type_enum"), nullable=False)
     content_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     file_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     course = relationship("Course", back_populates="materials")
     accessibility = relationship("MaterialAccessibility", back_populates="material", cascade="all, delete")
@@ -28,6 +29,6 @@ class MaterialAccessibility(Base):
     kind: Mapped[str] = mapped_column(Enum("captions", "transcript", "audio_description", name="ma_kind_enum"), nullable=False)
     language: Mapped[str] = mapped_column(String(10), default="en")
     file_url: Mapped[str] = mapped_column(Text, nullable=False)
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     material = relationship("Material", back_populates="accessibility")

@@ -1,5 +1,9 @@
 // ====== CONFIG ======
-const API_BASE = "http://127.0.0.1:8000"; // change if your backend is hosted
+const API_BASE = (
+  String(window.API_BASE || "").trim() ||
+  String(localStorage.getItem("api_base") || "").trim() ||
+  "http://127.0.0.1:8000"
+).replace(/\/$/, "");
 
 // ====== TOKEN HELPERS ======
 function setToken(token){ localStorage.setItem("token", token); }
@@ -16,11 +20,18 @@ async function api(path, { method="GET", body=null, auth=true } = {}){
   const headers = { "Content-Type": "application/json" };
   if (auth) Object.assign(headers, authHeaders());
 
-  const res = await fetch(`${API_BASE}${path}`, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : null
-  });
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : null
+    });
+  } catch {
+    throw new Error(
+      `Cannot reach the API at ${API_BASE}. Check frontend/assets/config.js and Railway CORS_ORIGINS.`
+    );
+  }
 
   let data = null;
   const text = await res.text();
@@ -46,6 +57,7 @@ function applySettingsToUI(settings){
 
   // reduce motion
   document.body.classList.toggle("reduce-motion", !!settings.reduce_motion);
+  document.body.classList.toggle("dyslexia-friendly", !!settings.dyslexia_friendly);
 }
 
 async function loadAccessibility(){
@@ -87,7 +99,11 @@ function stopSpeaking(){
 // ====== AUTH GUARDS ======
 async function requireLogin(){
   const t = getToken();
-  if (!t) window.location.href = "login.html";
+  if (!t) {
+    window.location.href = "login.html";
+    return false;
+  }
+  return true;
 }
 
 async function getMe(){
@@ -99,8 +115,28 @@ function qs(sel){ return document.querySelector(sel); }
 function qsa(sel){ return Array.from(document.querySelectorAll(sel)); }
 
 function setStatus(el, msg, isError=false){
+  if (!el) return;
   el.textContent = msg;
-  el.style.color = isError ? "crimson" : "inherit";
+  el.classList.toggle("is-error", !!isError);
+}
+
+function initPasswordToggles(){
+  qsa("[data-toggle-password]").forEach((btn) => {
+    const target = document.getElementById(btn.getAttribute("aria-controls"));
+    if (!target) return;
+    btn.addEventListener("click", () => {
+      const showing = target.type === "text";
+      target.type = showing ? "password" : "text";
+      btn.textContent = showing ? "Show" : "Hide";
+      btn.setAttribute("aria-pressed", String(!showing));
+    });
+  });
+}
+
+if (document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", initPasswordToggles);
+} else {
+  initPasswordToggles();
 }
 
 // ====== NAV BAR ======
@@ -138,17 +174,31 @@ async function loadCourses(listEl){
   const courses = await api("/courses");
   listEl.innerHTML = "";
 
+  if (!courses.length){
+    listEl.innerHTML = `
+      <div class="empty-state">
+        <strong>No courses yet</strong>
+        <p class="smallmuted">Instructors can create and publish courses from the instructor studio.</p>
+      </div>
+    `;
+    return { me, totalCourses: 0, publishedCourses: 0, draftCourses: 0 };
+  }
+
   courses.forEach(c => {
     const div = document.createElement("div");
-    div.className = "card";
+    div.className = "course-card";
     div.setAttribute("role", "article");
     div.innerHTML = `
-      <h3 style="margin:0 0 6px 0;">${escapeHtml(c.title)}</h3>
-      <div class="smallmuted">${escapeHtml(c.course_code || "")}</div>
+      <div class="course-card-top">
+        <span class="badge">${escapeHtml(c.course_code || "Course")}</span>
+        <span class="badge ${c.is_published ? "badge-success" : "badge-muted"}">${c.is_published ? "Published" : "Draft"}</span>
+      </div>
+      <h3>${escapeHtml(c.title)}</h3>
       <p>${escapeHtml(c.description || "No description")}</p>
       <div class="toolbar">
         <a href="course.html?id=${encodeURIComponent(c.id)}">Open course</a>
         ${me.role === "student" ? `<button data-enroll="${c.id}">Enroll</button>` : ""}
+        ${["instructor", "admin"].includes(me.role) ? `<a href="instructor.html">Manage</a>` : ""}
       </div>
     `;
     listEl.appendChild(div);
@@ -159,13 +209,20 @@ async function loadCourses(listEl){
     btn.addEventListener("click", async () => {
       try{
         await api(`/courses/${btn.dataset.enroll}/enroll`, { method:"POST" });
-        btn.textContent = "Enrolled ✅";
+        btn.textContent = "Enrolled";
         btn.disabled = true;
       }catch(e){
         alert(e.message);
       }
     });
   });
+
+  return {
+    me,
+    totalCourses: courses.length,
+    publishedCourses: courses.filter(c => c.is_published).length,
+    draftCourses: courses.filter(c => !c.is_published).length,
+  };
 }
 
 // ====== COURSE PAGE ======
@@ -173,17 +230,32 @@ async function loadCoursePage(courseId){
   const course = await api(`/courses/${courseId}`);
   qs("#courseTitle").textContent = course.title;
   qs("#courseDesc").textContent = course.description || "No description";
+  qs("#courseCode").textContent = course.course_code || "Course";
+  qs("#coursePublished").textContent = course.is_published ? "Published" : "Draft";
+  qs("#coursePublished").classList.toggle("badge-success", !!course.is_published);
 
   const mats = await api(`/courses/${courseId}/materials`);
   const wrap = qs("#materialsWrap");
   wrap.innerHTML = "";
 
+  if (!mats.length){
+    wrap.innerHTML = `
+      <div class="empty-state">
+        <strong>No materials in this course yet</strong>
+        <p class="smallmuted">Instructors can add text, PDF, audio, and video resources with transcripts or captions.</p>
+      </div>
+    `;
+    return;
+  }
+
   mats.forEach(m => {
     const card = document.createElement("div");
-    card.className = "card";
+    card.className = "material-card";
     card.innerHTML = `
-      <h3 style="margin:0 0 6px 0;">${escapeHtml(m.title)}</h3>
-      <div class="smallmuted">Type: ${escapeHtml(m.material_type)}</div>
+      <div>
+        <span class="badge">${escapeHtml(typeLabel(m.material_type))}</span>
+        <h3>${escapeHtml(m.title)}</h3>
+      </div>
       <div class="toolbar">
         <button data-open="${m.id}">Open</button>
         <button data-progress="${m.id}" data-status="in_progress">Mark in progress</button>
@@ -207,7 +279,7 @@ async function loadCoursePage(courseId){
           method:"PUT",
           body:{ status: btn.dataset.status }
         });
-        alert("Saved ✅");
+        alert("Saved");
       }catch(e){
         alert(e.message);
       }
@@ -282,11 +354,187 @@ async function initInstructor(courseSelect){
   const me = await getMe();
   if (!["instructor", "admin"].includes(me.role)){
     qs("#instructorOnly").textContent = "This page is only for instructors/admins.";
-    return;
+    qsa(".instructor-panel").forEach((el) => el.classList.add("hidden"));
+    return false;
   }
 
   const courses = await api("/courses");
   courseSelect.innerHTML = courses.map(c => `<option value="${escapeAttr(c.id)}">${escapeHtml(c.title)}</option>`).join("");
+  return true;
+}
+
+async function refreshInstructorWorkspace(selectedCourseId=null){
+  const courses = await api("/courses");
+  const courseSelect = qs("#courseSelect");
+  courseSelect.innerHTML = courses.map(c => `<option value="${escapeAttr(c.id)}">${escapeHtml(c.title)}</option>`).join("");
+  if (selectedCourseId && courses.some(c => c.id === selectedCourseId)){
+    courseSelect.value = selectedCourseId;
+  }
+
+  qs("#instructorCourseCount").textContent = courses.length;
+  qs("#instructorPublishedCount").textContent = courses.filter(c => c.is_published).length;
+  qs("#instructorDraftCount").textContent = courses.filter(c => !c.is_published).length;
+
+  renderCourseManager(courses);
+  await renderSelectedMaterials(courseSelect.value);
+}
+
+function renderCourseManager(courses){
+  const wrap = qs("#courseManager");
+  if (!courses.length){
+    wrap.innerHTML = `
+      <div class="empty-state">
+        <strong>No courses yet</strong>
+        <p class="smallmuted">Create a course manually or use the demo course button for your presentation.</p>
+      </div>
+    `;
+    return;
+  }
+
+  wrap.innerHTML = "";
+  courses.forEach((course) => {
+    const card = document.createElement("article");
+    card.className = "course-card";
+    card.innerHTML = `
+      <div class="course-card-top">
+        <span class="badge">${escapeHtml(course.course_code || "Course")}</span>
+        <span class="badge ${course.is_published ? "badge-success" : "badge-muted"}">${course.is_published ? "Published" : "Draft"}</span>
+      </div>
+      <h3>${escapeHtml(course.title)}</h3>
+      <p>${escapeHtml(course.description || "No description")}</p>
+      <div class="toolbar">
+        <button type="button" data-select-course="${escapeAttr(course.id)}">Select</button>
+        <a href="course.html?id=${encodeURIComponent(course.id)}">Preview</a>
+        <button type="button" data-publish-course="${escapeAttr(course.id)}" data-published="${course.is_published ? "true" : "false"}">
+          ${course.is_published ? "Unpublish" : "Publish"}
+        </button>
+      </div>
+    `;
+    wrap.appendChild(card);
+  });
+
+  qsa("[data-select-course]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      qs("#courseSelect").value = btn.dataset.selectCourse;
+      await renderSelectedMaterials(btn.dataset.selectCourse);
+    });
+  });
+
+  qsa("[data-publish-course]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const isPublished = btn.dataset.published === "true";
+      await api(`/courses/${btn.dataset.publishCourse}`, {
+        method: "PATCH",
+        body: { is_published: !isPublished }
+      });
+      await refreshInstructorWorkspace(btn.dataset.publishCourse);
+    });
+  });
+}
+
+async function renderSelectedMaterials(courseId){
+  const wrap = qs("#selectedMaterials");
+  if (!wrap) return;
+  if (!courseId){
+    wrap.innerHTML = `
+      <div class="empty-state">
+        <strong>Select or create a course</strong>
+        <p class="smallmuted">Materials will appear here after you choose a course.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const mats = await api(`/courses/${courseId}/materials`);
+  if (!mats.length){
+    wrap.innerHTML = `
+      <div class="empty-state">
+        <strong>No materials yet</strong>
+        <p class="smallmuted">Add text, PDF, audio, or video content. Video materials can include captions and transcripts.</p>
+      </div>
+    `;
+    return;
+  }
+
+  wrap.innerHTML = "";
+  mats.forEach((m) => {
+    const card = document.createElement("article");
+    card.className = "material-card";
+    card.innerHTML = `
+      <div>
+        <span class="badge">${escapeHtml(typeLabel(m.material_type))}</span>
+        <h3>${escapeHtml(m.title)}</h3>
+        <p class="smallmuted">${escapeHtml(m.content_text ? m.content_text.slice(0, 120) : (m.file_url || ""))}</p>
+      </div>
+      <div class="toolbar">
+        <button type="button" data-fill-a11y="${escapeAttr(m.id)}">Use for captions</button>
+        <button type="button" data-delete-material="${escapeAttr(m.id)}">Delete</button>
+      </div>
+    `;
+    wrap.appendChild(card);
+  });
+
+  qsa("[data-fill-a11y]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      qs("#a11y_mat_id").value = btn.dataset.fillA11y;
+      qs("#a11y_url").focus();
+    });
+  });
+
+  qsa("[data-delete-material]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      await api(`/materials/${btn.dataset.deleteMaterial}`, { method: "DELETE" });
+      await renderSelectedMaterials(qs("#courseSelect").value);
+    });
+  });
+}
+
+async function createDemoCourse(){
+  const suffix = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const course = await api("/courses", {
+    method: "POST",
+    body: {
+      course_code: "DIS-201",
+      title: `Inclusive Digital Learning Demo (${suffix})`,
+      description: "A demonstration course showing accessible text lessons, keyboard-friendly navigation, learner progress tracking, captions, transcripts, and personal accessibility settings."
+    }
+  });
+
+  const materials = [
+    {
+      title: "Lesson 1: What inclusive e-learning means",
+      material_type: "text",
+      content_text: "Inclusive e-learning gives students with visual, hearing, motor, cognitive, and reading disabilities equal access to learning materials. This platform demonstrates adjustable text size, high contrast, reduced motion, text-to-speech support, captions, transcripts, and progress tracking."
+    },
+    {
+      title: "Lesson 2: Accessible study checklist",
+      material_type: "text",
+      content_text: "Before publishing a lesson, check that headings are clear, text has good contrast, videos include captions, audio includes transcripts, buttons can be reached with the keyboard, and students can save their learning progress."
+    },
+    {
+      title: "Audio resource: Course orientation",
+      material_type: "audio",
+      file_url: "https://www.w3schools.com/html/horse.mp3"
+    }
+  ];
+
+  for (const material of materials){
+    await api(`/courses/${course.id}/materials`, { method: "POST", body: material });
+  }
+
+  return api(`/courses/${course.id}`, {
+    method: "PATCH",
+    body: { is_published: true }
+  });
+}
+
+function typeLabel(type){
+  return {
+    text: "Text lesson",
+    pdf: "PDF",
+    video: "Video",
+    audio: "Audio",
+  }[type] || type;
 }
 
 // ====== SANITIZE HELPERS ======

@@ -1,5 +1,9 @@
-from fastapi import FastAPI
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.config import settings
 from app.core.database import engine, Base
@@ -10,19 +14,21 @@ from app.routers import (
     materials_router, accessibility_router, progress_router
 )
 
-app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if settings.AUTO_CREATE_TABLES:
+        Base.metadata.create_all(bind=engine)
+    yield
 
-origins = [o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()]
+app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG, lifespan=lifespan)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins if origins else ["*"],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Create tables automatically (fine for school projects)
-Base.metadata.create_all(bind=engine)
 
 app.include_router(auth_router)
 app.include_router(users_router)
@@ -34,3 +40,12 @@ app.include_router(progress_router)
 @app.get("/")
 def root():
     return {"message": "Accessible E-Learning API is running"}
+
+@app.get("/healthz", tags=["Health"])
+def healthz():
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+    except SQLAlchemyError:
+        raise HTTPException(status_code=503, detail="Database unavailable")
+    return {"status": "ok", "database": "ok"}

@@ -11,7 +11,6 @@
     <header>
       <div>
         <strong>Accessible E-Learning</strong>
-        <div class="smallmuted">Keyboard: <kbd>Tab</kbd> to navigate • <kbd>Enter</kbd> to activate</div>
       </div>
       <div class="toolbar" aria-label="User actions">
         <span id="headerMe" class="smallmuted"></span>
@@ -21,38 +20,76 @@
     </header>
 
     <section class="card" aria-label="Accessibility controls">
-      <h2 style="margin-top:0;">Accessibility</h2>
-      <div class="toolbar">
-        <button id="fontMinus">A-</button>
-        <button id="fontPlus">A+</button>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow-text">Access profile</p>
+          <h2>Accessibility controls</h2>
+        </div>
+        <span id="fontScaleValue" class="badge">Font 100%</span>
+      </div>
+      <div class="control-grid">
+        <div class="control-card">
+          <span class="control-label">Text size</span>
+          <div class="toolbar">
+            <button id="fontMinus" type="button">A-</button>
+            <button id="fontPlus" type="button">A+</button>
+          </div>
+        </div>
 
-        <label for="contrastSelect" class="smallmuted">Contrast</label>
-        <select id="contrastSelect" aria-label="Contrast mode">
-          <option value="normal">Normal</option>
-          <option value="high">High</option>
-          <option value="dark">Dark</option>
-        </select>
+        <div class="control-card">
+          <label for="contrastSelect" class="control-label">Contrast</label>
+          <select id="contrastSelect" aria-label="Contrast mode">
+            <option value="normal">Normal</option>
+            <option value="high">High</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
 
-        <label class="smallmuted">
+        <label class="check-card">
           <input type="checkbox" id="reduceMotion" />
-          Reduce motion
+          <span>Reduce motion</span>
         </label>
 
-        <label class="smallmuted">
+        <label class="check-card">
           <input type="checkbox" id="ttsEnabled" />
-          Enable TTS button
+          <span>Enable TTS button</span>
+        </label>
+
+        <label class="check-card">
+          <input type="checkbox" id="dyslexiaFriendly" />
+          <span>Dyslexia-friendly reading</span>
         </label>
       </div>
-      <p class="smallmuted">Settings are saved to your profile.</p>
+    </section>
+
+    <section class="stats-grid" aria-label="Learning summary">
+      <div class="stat-card">
+        <span class="smallmuted">Available courses</span>
+        <strong id="courseCount">0</strong>
+      </div>
+      <div class="stat-card">
+        <span id="completedLabel" class="smallmuted">Completed materials</span>
+        <strong id="completedCount">0</strong>
+      </div>
+      <div class="stat-card">
+        <span id="progressLabel" class="smallmuted">In progress</span>
+        <strong id="progressCount">0</strong>
+      </div>
     </section>
 
     <section>
-      <h2>Courses</h2>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow-text">Learning catalog</p>
+          <h2>Courses</h2>
+        </div>
+      </div>
       <div id="status" class="smallmuted"></div>
-      <div id="coursesList" aria-live="polite"></div>
+      <div id="coursesList" class="course-grid" aria-live="polite"></div>
     </section>
   </div>
 
+  <script src="assets/config.js"></script>
   <script src="assets/app.js"></script>
   <script>
     (async () => {
@@ -65,25 +102,43 @@
         document.querySelector("#contrastSelect").value = s.contrast_mode;
         document.querySelector("#reduceMotion").checked = !!s.reduce_motion;
         document.querySelector("#ttsEnabled").checked = !!s.tts_enabled;
+        document.querySelector("#dyslexiaFriendly").checked = !!s.dyslexia_friendly;
       }
 
       const status = document.querySelector("#status");
       try{
-        await loadCourses(document.querySelector("#coursesList"));
+        const summary = await loadCourses(document.querySelector("#coursesList"));
+        document.querySelector("#courseCount").textContent = summary.totalCourses;
+        if (summary.me.role === "student"){
+          const progress = await api("/progress/me");
+          document.querySelector("#completedCount").textContent = progress.filter(x => x.status === "completed").length;
+          document.querySelector("#progressCount").textContent = progress.filter(x => x.status === "in_progress").length;
+        } else {
+          document.querySelector("#completedLabel").textContent = "Published courses";
+          document.querySelector("#progressLabel").textContent = "Draft courses";
+          document.querySelector("#completedCount").textContent = summary.publishedCourses;
+          document.querySelector("#progressCount").textContent = summary.draftCourses;
+        }
       }catch(e){
         setStatus(status, e.message, true);
       }
 
       // Accessibility controls -> API updates
       let fontScale = s?.font_scale ?? 1.0;
+      function updateFontBadge(){
+        document.querySelector("#fontScaleValue").textContent = `Font ${Math.round(fontScale * 100)}%`;
+      }
+      updateFontBadge();
 
       document.querySelector("#fontPlus").onclick = async () => {
         fontScale = Math.min(2.0, Math.round((fontScale + 0.1) * 10) / 10);
         await updateAccessibility({ font_scale: fontScale });
+        updateFontBadge();
       };
       document.querySelector("#fontMinus").onclick = async () => {
         fontScale = Math.max(0.7, Math.round((fontScale - 0.1) * 10) / 10);
         await updateAccessibility({ font_scale: fontScale });
+        updateFontBadge();
       };
       document.querySelector("#contrastSelect").onchange = async (e) => {
         await updateAccessibility({ contrast_mode: e.target.value });
@@ -93,6 +148,9 @@
       };
       document.querySelector("#ttsEnabled").onchange = async (e) => {
         await updateAccessibility({ tts_enabled: e.target.checked });
+      };
+      document.querySelector("#dyslexiaFriendly").onchange = async (e) => {
+        await updateAccessibility({ dyslexia_friendly: e.target.checked });
       };
     })();
   </script>

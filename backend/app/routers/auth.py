@@ -14,13 +14,14 @@ def register(payload: RegisterIn, db: Session = Depends(get_db)):
     role = payload.role.lower().strip()
     if role not in ("student", "instructor", "admin"):
         raise HTTPException(status_code=400, detail="Invalid role")
+    email = str(payload.email).strip().lower()
 
-    exists = db.query(User).filter(User.email == payload.email).first()
+    exists = db.query(User).filter(User.email == email).first()
     if exists:
         raise HTTPException(status_code=400, detail="Email already registered")
 
     user = User(
-        email=payload.email,
+        email=email,
         password_hash=hash_password(payload.password),
         full_name=payload.full_name,
         role=role,
@@ -38,7 +39,8 @@ def register(payload: RegisterIn, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=TokenOut)
 def login(payload: LoginIn, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == payload.email).first()
+    email = str(payload.email).strip().lower()
+    user = db.query(User).filter(User.email == email).first()
     if not user or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
