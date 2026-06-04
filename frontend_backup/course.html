@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Classroom | AccessLearn</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    .material-sidebar {
+      border-right: 1px solid var(--line);
+      min-height: calc(100vh - 80px);
+    }
+    .material-nav-item {
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      transition: all 0.2s ease;
+    }
+    .material-nav-item:hover, .material-nav-item.active {
+      background: #edf3f1;
+      border-color: var(--brand);
+    }
+    .classroom-viewport {
+      padding: 2rem;
+      min-height: calc(100vh - 80px);
+    }
+    .tts-controls {
+      background: rgba(29, 111, 95, 0.08);
+      border: 1px solid rgba(29, 111, 95, 0.2);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body class="dashboard-body">
+  <a class="skip-link" href="#classroomContent">Skip to lesson content</a>
+  
+  <header class="topbar shadow-sm">
+    <nav class="navbar navbar-expand-lg dashboard-main py-2" aria-label="Main navigation">
+      <div class="container-fluid p-0 d-flex justify-content-between align-items-center">
+        <a class="brand text-dark" href="dashboard.html">
+          <span class="brand-mark" aria-hidden="true">AL</span>
+          <span>AccessLearn</span>
+        </a>
+        <div class="d-flex align-items-center gap-3">
+          <a class="btn btn-outline-secondary btn-sm" href="dashboard.html">← Back to Dashboard</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar Column -->
+      <aside class="col-lg-3 p-3 bg-white material-sidebar">
+        <div class="p-2 mb-3">
+          <p class="eyebrow mb-1" id="courseCodeText">Course Code</p>
+          <h1 class="h4 fw-bold mb-0 text-dark" id="courseTitleText">Loading Course...</h1>
+        </div>
+        <nav aria-label="Course lessons list">
+          <h2 class="h6 px-2 text-secondary text-uppercase fw-bold mb-3" style="font-size:0.75rem; letter-spacing:0.05em;">Course Lessons</h2>
+          <div id="materialList">
+            <div class="text-center py-4">
+              <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+            </div>
+          </div>
+        </nav>
+      </aside>
+
+      <!-- Main Classroom Pane -->
+      <main id="classroomContent" class="col-lg-9 classroom-viewport">
+        <!-- Default State -->
+        <div id="defaultLessonView" class="text-center py-5 glass-card rounded-3 p-5" style="max-width:700px; margin: 4rem auto;">
+          <span style="font-size:4rem;">📖</span>
+          <h2 class="h3 fw-bold mt-3 mb-2">Welcome to your Adaptive Classroom</h2>
+          <p class="text-secondary mb-0">Select any lesson from the sidebar menu on the left to display its contents. The layout will adapt automatically around your preferred accessibility options.</p>
+        </div>
+
+        <!-- Lesson Render Pane -->
+        <div id="activeLessonView" style="display:none; max-width:850px; margin: 0 auto;">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 id="activeLessonTitle" class="h2 fw-bold text-dark mb-0">Lesson Title</h2>
+            <div class="d-flex align-items-center gap-2">
+              <span id="lessonTypeBadge" class="badge bg-secondary badge-a11y">Text</span>
+            </div>
+          </div>
+
+          <!-- Text-to-Speech Voice Controller (Only shown for text content) -->
+          <div id="ttsControlsPanel" class="tts-controls" style="display:none;">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+              <div class="d-flex align-items-center gap-2">
+                <span style="font-size:1.2rem;">🔊</span>
+                <span class="fw-bold" style="color:var(--brand-dark);">Audio Reader (Text-to-Speech)</span>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-primary" onclick="speakActiveLesson()">Play Read Aloud</button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="pauseActiveLesson()">Pause / Resume</button>
+                <button class="btn btn-sm btn-outline-danger" onclick="stopActiveLesson()">Stop</button>
+                <select id="ttsRateSelect" class="form-select form-select-sm" style="width:90px;" aria-label="Speech Speed">
+                  <option value="0.75">0.75x speed</option>
+                  <option value="1.0" selected>1.0x speed</option>
+                  <option value="1.25">1.25x speed</option>
+                  <option value="1.5">1.5x speed</option>
+                  <option value="2.0">2.0x speed</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Adaptive Content Frame -->
+          <div id="lessonContentContainer" class="glass-card rounded-3 p-4 bg-white shadow-sm mb-4">
+            <!-- Dynamic Content gets injected here -->
+          </div>
+
+          <!-- Progress Check-off Card -->
+          <div class="card p-3 shadow-sm rounded-3 glass-card d-flex flex-row justify-content-between align-items-center mb-5">
+            <div>
+              <h3 class="h6 mb-0 fw-bold text-dark">Have you finished reading/viewing this lesson?</h3>
+              <p class="mb-0 text-secondary small">Track your learning progress to help instructors verify completion.</p>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-outline-brand" id="markProgressBtn" onclick="toggleProgress()">Mark Completed ✅</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/app.js"></script>
+  <script>
+    let courseId = null;
+    let materialsList = [];
+    let selectedMaterialId = null;
+    let currentProgressMap = {};
+
+    function initPage() {
+      const params = new URLSearchParams(window.location.search);
+      courseId = params.get("id");
+      if (!courseId) {
+        window.location.href = "dashboard.html";
+        return;
+      }
+      
+      loadCourseMetadata();
+      loadCourseMaterials();
+    }
+
+    async function loadCourseMetadata() {
+      try {
+        const course = await api(`/courses/${courseId}`);
+        document.getElementById("courseCodeText").textContent = course.course_code || "GEN-101";
+        document.getElementById("courseTitleText").textContent = course.title;
+        document.title = `${course.title} | AccessLearn Classroom`;
+      } catch (error) {
+        alert("Failed to load course details.");
+      }
+    }
+
+    async function loadCourseMaterials() {
+      const listEl = document.getElementById("materialList");
+      try {
+        // Fetch materials and student progress concurrently
+        const [mats, prog] = await Promise.all([
+          api(`/courses/${courseId}/materials`),
+          api("/progress/me")
+        ]);
+
+        materialsList = mats;
+        
+        // Cache progress records map
+        currentProgressMap = {};
+        prog.forEach(p => {
+          currentProgressMap[p.material_id] = p.status;
+        });
+
+        if (mats.length === 0) {
+          listEl.innerHTML = `<div class="text-center py-4 text-secondary small">No lessons published yet.</div>`;
+          return;
+        }
+
+        listEl.innerHTML = "";
+        mats.forEach((m, idx) => {
+          const item = document.createElement("div");
+          const status = currentProgressMap[m.id] || "not_started";
+          
+          item.className = `material-nav-item ${selectedMaterialId === m.id ? 'active' : ''}`;
+          item.id = `nav-item-${m.id}`;
+          item.setAttribute("role", "button");
+          item.setAttribute("tabindex", "0");
+          item.onclick = () => selectMaterial(m.id);
+          item.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") selectMaterial(m.id); };
+
+          let typeIcon = "📄";
+          if (m.material_type === "pdf") typeIcon = "📕";
+          if (m.material_type === "audio") typeIcon = "🎧";
+          if (m.material_type === "video") typeIcon = "🎥";
+
+          let statusCheck = `<span style="opacity: 0.3;">○</span>`;
+          if (status === "completed") {
+            statusCheck = `<span class="text-success fw-bold">✓</span>`;
+          } else if (status === "in_progress") {
+            statusCheck = `<span class="text-warning fw-bold">⌛</span>`;
+          }
+
+          item.innerHTML = `
+            <div class="d-flex align-items-center gap-2">
+              <span>${typeIcon}</span>
+              <span class="text-start" style="font-size:0.92rem; font-weight:700;">${escapeHtml(m.title)}</span>
+            </div>
+            <div>${statusCheck}</div>
+          `;
+          listEl.appendChild(item);
+        });
+
+      } catch (error) {
+        listEl.innerHTML = `<div class="alert alert-danger p-2 small">${escapeHtml(error.message)}</div>`;
+      }
+    }
+
+    function selectMaterial(id) {
+      stopActiveLesson(); // Stop any reading TTS speech
+      
+      // Update visual tab selection states
+      if (selectedMaterialId) {
+        const prev = document.getElementById(`nav-item-${selectedMaterialId}`);
+        if (prev) prev.classList.remove("active");
+      }
+      selectedMaterialId = id;
+      const curr = document.getElementById(`nav-item-${selectedMaterialId}`);
+      if (curr) curr.classList.add("active");
+
+      const m = materialsList.find(x => x.id === id);
+      if (!m) return;
+
+      document.getElementById("defaultLessonView").style.display = "none";
+      document.getElementById("activeLessonView").style.display = "block";
+      
+      document.getElementById("activeLessonTitle").textContent = m.title;
+      document.getElementById("lessonTypeBadge").textContent = m.material_type.toUpperCase();
+      
+      // Update check button state
+      const currentStatus = currentProgressMap[m.id] || "not_started";
+      const markBtn = document.getElementById("markProgressBtn");
+      if (currentStatus === "completed") {
+        markBtn.textContent = "Completed ✓";
+        markBtn.className = "btn btn-sm btn-success";
+      } else {
+        markBtn.textContent = "Mark Completed ✅";
+        markBtn.className = "btn btn-sm btn-outline-brand";
+      }
+
+      // Track that student started/opened the lesson (mark in progress)
+      if (currentStatus === "not_started") {
+        updateProgressState("in_progress");
+      }
+
+      renderLessonContent(m);
+    }
+
+    async function renderLessonContent(m) {
+      const container = document.getElementById("lessonContentContainer");
+      const ttsPanel = document.getElementById("ttsControlsPanel");
+      
+      container.innerHTML = "";
+      ttsPanel.style.display = "none";
+
+      if (m.material_type === "text") {
+        ttsPanel.style.display = "block";
+        container.innerHTML = `
+          <div id="textLessonContent" tabindex="0" class="lh-base" style="font-size: 1.15rem; outline: none; border: none;">
+            ${escapeHtml(m.content_text || "").replaceAll("\n", "<br>")}
+          </div>
+        `;
+        return;
+      }
+
+      if (m.material_type === "pdf") {
+        container.innerHTML = `
+          <div class="text-center p-3">
+            <p class="mb-3">This lesson contains a PDF document. You can open it directly in a new window or view it below.</p>
+            <a href="${escapeHtml(m.file_url)}" class="btn btn-outline-brand mb-4" target="_blank" rel="noopener">Open PDF in New Window</a>
+            <iframe title="${escapeHtml(m.title)} PDF" src="${escapeHtml(m.file_url)}" style="width:100%; height:600px; border: 1px solid var(--line); border-radius:8px;"></iframe>
+          </div>
+        `;
+        return;
+      }
+
+      if (m.material_type === "audio") {
+        // Fetch accessibility tools
+        let accItems = [];
+        try {
+          accItems = await api(`/materials/${m.id}/accessibility`);
+        } catch {}
+        const transcript = accItems.find(x => x.kind === "transcript");
+
+        let accHtml = "";
+        if (transcript) {
+          accHtml = `
+            <div class="card mt-4 glass-card">
+              <div class="card-header bg-light"><strong>Audio Transcript</strong></div>
+              <div class="card-body p-3" style="max-height: 250px; overflow-y: auto;">
+                <p class="mb-0 text-secondary">${escapeHtml(transcript.content_text || "").replaceAll("\n", "<br>")}</p>
+              </div>
+            </div>
+          `;
+        } else {
+          accHtml = `<div class="alert alert-light border mt-4 text-center text-muted small">No transcript provided for this audio resource.</div>`;
+        }
+
+        container.innerHTML = `
+          <div class="p-3 text-center">
+            <span style="font-size:3rem; display:block;" class="mb-3">🎧</span>
+            <audio controls src="${escapeHtml(m.file_url)}" style="width:100%; max-width:600px;" class="mb-3"></audio>
+            ${accHtml}
+          </div>
+        `;
+        return;
+      }
+
+      if (m.material_type === "video") {
+        let accItems = [];
+        try {
+          accItems = await api(`/materials/${m.id}/accessibility`);
+        } catch {}
+
+        const caption = accItems.find(x => x.kind === "captions");
+        const transcript = accItems.find(x => x.kind === "transcript");
+        const signLanguage = accItems.find(x => x.kind === "sign_language");
+
+        let trackTag = "";
+        if (caption && caption.file_url) {
+          trackTag = `<track kind="captions" src="${escapeHtml(caption.file_url)}" srclang="en" label="English" default />`;
+        }
+
+        let accHtml = "";
+        if (transcript) {
+          accHtml += `
+            <div class="card mt-3 glass-card text-start">
+              <div class="card-header bg-light"><strong>Video Text Transcript</strong></div>
+              <div class="card-body p-3" style="max-height: 200px; overflow-y: auto;">
+                <p class="mb-0 text-secondary">${escapeHtml(transcript.content_text || "").replaceAll("\n", "<br>")}</p>
+              </div>
+            </div>
+          `;
+        }
+
+        if (signLanguage && signLanguage.file_url) {
+          accHtml += `
+            <div class="alert alert-info mt-3 text-start">
+              📺 <strong>Sign Language Resource Available:</strong> 
+              <a href="${escapeHtml(signLanguage.file_url)}" target="_blank" rel="noopener">Open Sign Language Interpreter Video</a>
+            </div>
+          `;
+        }
+
+        container.innerHTML = `
+          <div class="p-2 text-center">
+            <div class="ratio ratio-16x9 mb-3" style="background:#000; border-radius:10px; overflow:hidden;">
+              <video id="classroomVideoPlayer" controls class="w-100" style="object-fit: contain;">
+                <source src="${escapeHtml(m.file_url)}" type="video/mp4">
+                ${trackTag}
+                Your browser does not support HTML5 video formats.
+              </video>
+            </div>
+            ${accHtml}
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `<div class="text-center py-4 text-secondary">Unknown resource display wrapper.</div>`;
+    }
+
+    // Speech controls
+    function speakActiveLesson() {
+      const content = document.getElementById("textLessonContent");
+      if (!content) return;
+      
+      const speed = parseFloat(document.getElementById("ttsRateSelect").value);
+      
+      // Select standard voice and call SpeechSynthesis
+      speakText(content.innerText, (charIndex) => {
+        if (charIndex === null) {
+          // Reset highlights
+          content.innerHTML = escapeHtml(content.innerText).replaceAll("\n", "<br>");
+          return;
+        }
+        
+        // Highlight word (visual feedback)
+        highlightWordAt(content, charIndex);
+      }, speed);
+    }
+
+    function highlightWordAt(el, index) {
+      const fullText = el.innerText;
+      
+      // Find boundary
+      let end = index;
+      while (end < fullText.length && /\w/.test(fullText[end])) {
+        end++;
+      }
+      
+      const before = fullText.slice(0, index);
+      const word = fullText.slice(index, end);
+      const after = fullText.slice(end);
+
+      el.innerHTML = escapeHtml(before).replaceAll("\n", "<br>") + 
+                     `<span class="tts-highlight">${escapeHtml(word)}</span>` + 
+                     escapeHtml(after).replaceAll("\n", "<br>");
+    }
+
+    function pauseActiveLesson() {
+      pauseSpeaking();
+    }
+
+    function stopActiveLesson() {
+      stopSpeaking();
+      const content = document.getElementById("textLessonContent");
+      if (content) {
+        content.innerHTML = escapeHtml(content.innerText).replaceAll("\n", "<br>");
+      }
+    }
+
+    // Progress updates
+    async function toggleProgress() {
+      const currentStatus = currentProgressMap[selectedMaterialId] || "not_started";
+      const newStatus = currentStatus === "completed" ? "in_progress" : "completed";
+      await updateProgressState(newStatus);
+    }
+
+    async function updateProgressState(status) {
+      try {
+        await api(`/materials/${selectedMaterialId}/progress`, {
+          method: "PUT",
+          body: { status }
+        });
+        currentProgressMap[selectedMaterialId] = status;
+        
+        // Refresh sidebar checklist UI
+        loadCourseMaterials();
+        
+        // Update button
+        const markBtn = document.getElementById("markProgressBtn");
+        if (status === "completed") {
+          markBtn.textContent = "Completed ✓";
+          markBtn.className = "btn btn-sm btn-success";
+        } else {
+          markBtn.textContent = "Mark Completed ✅";
+          markBtn.className = "btn btn-sm btn-outline-brand";
+        }
+      } catch (error) {
+        console.error("Progress save failed:", error);
+      }
+    }
+
+    window.onbeforeunload = () => {
+      stopSpeaking();
+    };
+
+    initPage();
+  </script>
+</body>
+</html>

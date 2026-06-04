@@ -1,0 +1,375 @@
+:root {
+  --ink: #17212b;
+  --muted: #5d6978;
+  --paper: #fbfbf8;
+  --panel: #ffffff;
+  --line: #d8dee6;
+  --brand: #1d6f5f;
+  --brand-dark: #15544a;
+  --accent: #c94f2d;
+  --focus: #ffbf47;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+a {
+  color: var(--brand-dark);
+  font-weight: 700;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 4px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -5rem;
+  z-index: 10;
+  padding: .75rem 1rem;
+  color: #000;
+  background: var(--focus);
+  border-radius: .5rem;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(320px, 0.95fr) minmax(360px, 1.05fr);
+}
+
+.auth-intro {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 3rem;
+  padding: clamp(2rem, 5vw, 4.5rem);
+  color: #fff;
+  background:
+    linear-gradient(rgba(14, 35, 39, .84), rgba(14, 35, 39, .74)),
+    url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=80") center/cover;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: .75rem;
+  color: inherit;
+  text-decoration: none;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.brand-mark {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  color: #10201d;
+  background: #f6d56f;
+  border-radius: .65rem;
+  font-weight: 900;
+}
+
+.intro-copy {
+  max-width: 42rem;
+}
+
+.intro-copy h1 {
+  max-width: 11ch;
+  margin-bottom: 1rem;
+  font-size: clamp(2.5rem, 7vw, 5.3rem);
+  line-height: .96;
+}
+
+.intro-copy p {
+  max-width: 34rem;
+  font-size: 1.08rem;
+  color: rgba(255, 255, 255, .88);
+}
+
+.access-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.access-pills li {
+  padding: .55rem .75rem;
+  color: #10201d;
+  background: rgba(255, 255, 255, .88);
+  border-radius: 999px;
+  font-size: .9rem;
+  font-weight: 800;
+}
+
+.auth-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.25rem, 4vw, 4rem);
+}
+
+.auth-card {
+  width: min(100%, 42rem);
+  padding: clamp(1.25rem, 4vw, 2.25rem);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: .5rem;
+  box-shadow: 0 1.25rem 4rem rgba(23, 33, 43, .08);
+}
+
+.eyebrow {
+  margin-bottom: .35rem;
+  color: var(--accent);
+  font-size: .82rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.form-label {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.form-control,
+.form-select {
+  min-height: 3rem;
+  color: var(--ink);
+  border-color: #b8c2cf;
+  border-radius: .45rem;
+}
+
+.form-text {
+  color: var(--muted);
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--brand);
+  --bs-btn-border-color: var(--brand);
+  --bs-btn-hover-bg: var(--brand-dark);
+  --bs-btn-hover-border-color: var(--brand-dark);
+  --bs-btn-active-bg: var(--brand-dark);
+  --bs-btn-active-border-color: var(--brand-dark);
+  min-height: 3rem;
+  font-weight: 800;
+}
+
+.btn-outline-secondary {
+  --bs-btn-color: var(--ink);
+  --bs-btn-border-color: #aeb8c5;
+  --bs-btn-hover-bg: #edf3f1;
+  --bs-btn-hover-color: var(--ink);
+}
+
+.status {
+  min-height: 1.5rem;
+  margin: .75rem 0 0;
+  font-weight: 700;
+}
+
+.status.error {
+  color: #a22c21;
+}
+
+.status.success {
+  color: var(--brand-dark);
+}
+
+.dashboard-body {
+  background: #f4f1ea;
+}
+
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+}
+
+.dashboard-main {
+  width: min(1120px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 4rem;
+}
+
+.dashboard-hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.5rem 0 2rem;
+}
+
+.preference-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.feature-list {
+  display: grid;
+  gap: .85rem;
+}
+
+.feature-item {
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: .5rem;
+}
+
+.high-contrast {
+  --ink: #030303;
+  --muted: #1f1f1f;
+  --paper: #fff;
+  --panel: #fff;
+  --line: #000;
+  --brand: #005fcc;
+  --brand-dark: #003f88;
+  --accent: #9c1a00;
+}
+
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  scroll-behavior: auto !important;
+  transition-duration: .001ms !important;
+  animation-duration: .001ms !important;
+}
+
+@media (max-width: 900px) {
+  .auth-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-intro {
+    min-height: 42vh;
+  }
+}
+
+@media (max-width: 620px) {
+  .auth-panel {
+    padding: 1rem;
+  }
+
+  .auth-card {
+    padding: 1rem;
+  }
+
+  .preference-grid,
+  .dashboard-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .intro-copy h1 {
+    font-size: 2.55rem;
+  }
+}
+
+/* Accessibility: Dyslexia Font style */
+.dyslexia-font,
+.dyslexia-font *,
+.dyslexia-font p,
+.dyslexia-font div,
+.dyslexia-font span,
+.dyslexia-font li {
+  font-family: "OpenDyslexic", "Comic Sans MS", "Chalkboard SE", sans-serif !important;
+  letter-spacing: 0.12em !important;
+  word-spacing: 0.16em !important;
+  line-height: 1.65 !important;
+}
+
+/* Accessibility: Text size scaling */
+html.text-size-sm {
+  font-size: 14px;
+}
+html.text-size-md {
+  font-size: 16px;
+}
+html.text-size-lg {
+  font-size: 18px;
+}
+html.text-size-xl {
+  font-size: 21px;
+}
+
+/* Dyslexia reading ruler tool style */
+.reading-ruler {
+  position: fixed;
+  pointer-events: none;
+  height: 25px;
+  background: rgba(255, 191, 71, 0.25);
+  border-top: 1px solid var(--focus);
+  border-bottom: 1px solid var(--focus);
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  display: none;
+}
+body.ruler-active .reading-ruler {
+  display: block;
+}
+
+/* TTS highlight */
+.tts-highlight {
+  background-color: rgba(255, 235, 59, 0.4);
+  border-radius: 2px;
+}
+
+/* Glassmorphism dashboard cards */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+}
+
+/* Theme variables overrides for accessible UI elements */
+.badge-hearing { background-color: #e3f2fd; color: #0d47a1; border: 1px solid #90caf9; }
+.badge-vision { background-color: #efebe9; color: #4e342e; border: 1px solid #bcaaa4; }
+.badge-mobility { background-color: #f3e5f5; color: #4a148c; border: 1px solid #ce93d8; }
+.badge-cognitive { background-color: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+
+.badge-a11y {
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.3em 0.6em;
+  border-radius: 4px;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-right: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Add custom animations for interactive alerts */
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 0 0 rgba(29, 111, 95, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(29, 111, 95, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(29, 111, 95, 0); }
+}
+.recommended-pulse {
+  animation: pulseGlow 2s infinite;
+  border: 2px solid var(--brand) !important;
+}
+

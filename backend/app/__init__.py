@@ -1,0 +1,1 @@
+"""Accessible learning platform backend."""

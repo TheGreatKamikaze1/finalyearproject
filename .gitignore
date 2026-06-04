@@ -6,6 +6,7 @@ venv/
 __pycache__/
 *.pyc
 *.pyo
+backend/data/
 
 # OS
 .DS_Store
