@@ -13,6 +13,9 @@ export function AccessibilityProvider({ children }) {
     screen_reader_optimized: false,
     dyslexia_font: false,
     font_size: 'md',
+    accessibility_mode: 'standard',
+    guardian_contact_name: '',
+    guardian_contact_info: '',
   });
 
   const [rulerActive, setRulerActive] = useState(false);
@@ -31,11 +34,21 @@ export function AccessibilityProvider({ children }) {
     const body = document.body;
     const html = document.documentElement;
 
-    // High Contrast
-    body.classList.toggle('high-contrast', Boolean(prefs.high_contrast));
+    const mode = prefs.accessibility_mode || 'standard';
 
-    // Reduce Motion
-    body.classList.toggle('reduce-motion', Boolean(prefs.reduce_motion));
+    // Apply primary mode classes
+    body.classList.toggle('mode-standard', mode === 'standard');
+    body.classList.toggle('mode-visual', mode === 'visual');
+    body.classList.toggle('mode-hearing', mode === 'hearing');
+    body.classList.toggle('mode-cognitive', mode === 'cognitive');
+
+    // High Contrast: forced if mode is visual, otherwise user preference
+    const highContrastEnabled = mode === 'visual' ? true : Boolean(prefs.high_contrast);
+    body.classList.toggle('high-contrast', highContrastEnabled);
+
+    // Reduce Motion: forced if mode is cognitive, otherwise user preference
+    const reduceMotionEnabled = mode === 'cognitive' ? true : Boolean(prefs.reduce_motion);
+    body.classList.toggle('reduce-motion', reduceMotionEnabled);
 
     // Dyslexia Spacing Font
     body.classList.toggle('dyslexia-font', Boolean(prefs.dyslexia_font));

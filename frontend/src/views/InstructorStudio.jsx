@@ -7,7 +7,10 @@ function InstructorStudio({ user, navigateTo }) {
   const [activeCourse, setActiveCourse] = useState(null);
   const [materials, setMaterials] = useState([]);
   const [analytics, setAnalytics] = useState([]);
-  const [activeTab, setActiveTab] = useState('curriculum'); // 'curriculum' or 'analytics'
+  const [quizzes, setQuizzes] = useState([]);
+  
+  // Tabs: 'curriculum', 'quizzes', 'analytics'
+  const [activeTab, setActiveTab] = useState('curriculum');
   const [loading, setLoading] = useState(true);
 
   // Modals state
@@ -15,11 +18,18 @@ function InstructorStudio({ user, navigateTo }) {
   const [courseForm, setCourseForm] = useState({ course_code: '', title: '', description: '' });
 
   const [showMatModal, setShowMatModal] = useState(false);
-  const [matForm, setMatForm] = useState({ title: '', material_type: 'text', content_text: '', file_url: '' });
+  const [matForm, setMatForm] = useState({ title: '', material_type: 'text', content_text: '', file_url: '', image_alt_text: '' });
 
   const [showA11yModal, setShowA11yModal] = useState(false);
   const [selectedMatForA11y, setSelectedMatForA11y] = useState(null);
   const [a11yForm, setA11yForm] = useState({ kind: 'captions', language: 'en', file_url: '', content_text: '' });
+
+  // Quiz Modal State
+  const [showQuizModal, setShowQuizModal] = useState(false);
+  const [quizForm, setQuizForm] = useState({ title: '', description: '' });
+  const [quizQuestions, setQuizQuestions] = useState([
+    { text: '', question_type: 'multiple_choice', optionInput: '', correct_answer: '' }
+  ]);
 
   // Initial Load
   useEffect(() => {
@@ -31,8 +41,6 @@ function InstructorStudio({ user, navigateTo }) {
       setLoading(true);
       const data = await api('/courses');
       setCourses(data);
-      
-      // Keep active course synced if already selected
       if (activeCourse) {
         const updated = data.find(c => c.id === activeCourse.id);
         if (updated) setActiveCourse(updated);
@@ -53,8 +61,6 @@ function InstructorStudio({ user, navigateTo }) {
   const loadMaterials = async (courseId) => {
     try {
       const data = await api(`/courses/${courseId}/materials`);
-      
-      // For each material, fetch its accessibility tracks to check active setups
       const materialsWithA11y = await Promise.all(
         data.map(async (m) => {
           try {
@@ -71,6 +77,15 @@ function InstructorStudio({ user, navigateTo }) {
     }
   };
 
+  const loadQuizzes = async (courseId) => {
+    try {
+      const data = await api(`/courses/${courseId}/quizzes`);
+      setQuizzes(data);
+    } catch (err) {
+      console.error("Failed to load quizzes:", err);
+    }
+  };
+
   const loadAnalytics = async (courseId) => {
     try {
       const data = await api(`/courses/${courseId}/progress-summary`);
@@ -84,17 +99,17 @@ function InstructorStudio({ user, navigateTo }) {
     if (activeCourse) {
       if (activeTab === 'analytics') {
         loadAnalytics(activeCourse.id);
+      } else if (activeTab === 'quizzes') {
+        loadQuizzes(activeCourse.id);
       } else {
         loadMaterials(activeCourse.id);
       }
     }
   }, [activeTab, activeCourse?.id]);
 
-  // Actions
   const handleCreateCourse = async (e) => {
     e.preventDefault();
     if (!courseForm.title.trim()) return;
-
     try {
       const newCourse = await api('/courses', {
         method: 'POST',
@@ -111,8 +126,7 @@ function InstructorStudio({ user, navigateTo }) {
 
   const handleDeleteCourse = async () => {
     if (!activeCourse) return;
-    if (!window.confirm("Are you sure you want to delete this course and all its materials? This cannot be undone.")) return;
-
+    if (!window.confirm("Are you sure you want to delete this course? This cannot be undone.")) return;
     try {
       await api(`/courses/${activeCourse.id}`, { method: 'DELETE' });
       setActiveCourse(null);
@@ -145,7 +159,8 @@ function InstructorStudio({ user, navigateTo }) {
       title: matForm.title.trim(),
       material_type: matForm.material_type,
       content_text: matForm.material_type === 'text' ? matForm.content_text : null,
-      file_url: matForm.material_type !== 'text' ? matForm.file_url.trim() : null
+      file_url: matForm.material_type !== 'text' ? matForm.file_url.trim() : null,
+      image_alt_text: matForm.image_alt_text.trim() ? matForm.image_alt_text.trim() : null,
     };
 
     try {
@@ -154,7 +169,7 @@ function InstructorStudio({ user, navigateTo }) {
         body: payload
       });
       setShowMatModal(false);
-      setMatForm({ title: '', material_type: 'text', content_text: '', file_url: '' });
+      setMatForm({ title: '', material_type: 'text', content_text: '', file_url: '', image_alt_text: '' });
       loadMaterials(activeCourse.id);
     } catch (err) {
       alert(`Failed to add material: ${err.message}`);
@@ -201,14 +216,61 @@ function InstructorStudio({ user, navigateTo }) {
     setShowA11yModal(true);
   };
 
-  // Stats Calculations
-  const totalCourses = courses.length;
-  const liveCoursesCount = courses.filter(c => c.is_published).length;
-  const draftCoursesCount = totalCourses - liveCoursesCount;
+  // Quiz creation handling
+  const handleAddQuestionRow = () => {
+    setQuizQuestions(prev => [
+      ...prev,
+      { text: '', question_type: 'multiple_choice', optionInput: '', correct_answer: '' }
+    ]);
+  };
+
+  const handleQuizQuestionChange = (index, field, value) => {
+    setQuizQuestions(prev => {
+      const copy = [...prev];
+      copy[index][field] = value;
+      return copy;
+    });
+  };
+
+  const handleCreateQuiz = async (e) => {
+    e.preventDefault();
+    if (!quizForm.title.trim()) return;
+
+    // Parse questions options from comma separated strings
+    const questionsPayload = quizQuestions.map(q => {
+      const optionsArray = q.question_type === 'multiple_choice' 
+        ? q.optionInput.split(',').map(o => o.trim()).filter(Boolean)
+        : ["True", "False"];
+
+      return {
+        text: q.text.trim(),
+        question_type: q.question_type,
+        options: optionsArray,
+        correct_answer: q.correct_answer.trim()
+      };
+    });
+
+    try {
+      await api(`/courses/${activeCourse.id}/quizzes`, {
+        method: 'POST',
+        body: {
+          title: quizForm.title.trim(),
+          description: quizForm.description.trim() || null,
+          questions: questionsPayload
+        }
+      });
+      setShowQuizModal(false);
+      setQuizForm({ title: '', description: '' });
+      setQuizQuestions([{ text: '', question_type: 'multiple_choice', optionInput: '', correct_answer: '' }]);
+      loadQuizzes(activeCourse.id);
+    } catch (err) {
+      alert(`Quiz creation failed: ${err.message}`);
+    }
+  };
 
   return (
     <div className="classroom-grid">
-      {/* Sidebar: Course List controller */}
+      {/* Sidebar course menu */}
       <aside className="lessons-sidebar">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
           <h2 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--muted)', letterSpacing: '0.05em' }}>My Courses</h2>
@@ -253,20 +315,18 @@ function InstructorStudio({ user, navigateTo }) {
       <section className="lesson-viewport">
         {!activeCourse ? (
           <div>
-            <h1 style={{ fontSize: '2.2rem', marginBottom: '1.5rem' }}>Instructor Studio</h1>
+            <h1 style={{ fontSize: '2.2rem', marginBottom: '1.5rem' }}>Instructor Control Studio</h1>
 
-            {/* General Metrics Tiles */}
-            <div className="stat-grid">
+            {/* Metrics */}
+            <div className="stat-grid" style={{ marginBottom: '2.5rem' }}>
               <div className="stat-card">
-                <span className="stat-num">{totalCourses}</span>
+                <span className="stat-num">{courses.length}</span>
                 <span className="stat-label">Total Courses</span>
               </div>
               <div className="stat-card">
-                <span className="stat-num" style={{ color: 'var(--warning)' }}>{draftCoursesCount}</span>
-                <span className="stat-label">Draft Courses</span>
-              </div>
-              <div className="stat-card">
-                <span className="stat-num" style={{ color: 'var(--success)' }}>{liveCoursesCount}</span>
+                <span className="stat-num" style={{ color: 'var(--success)' }}>
+                  {courses.filter(c => c.is_published).length}
+                </span>
                 <span className="stat-label">Published Live</span>
               </div>
             </div>
@@ -275,13 +335,13 @@ function InstructorStudio({ user, navigateTo }) {
               <span style={{ fontSize: '3rem', display: 'block', marginBottom: '1rem' }}>🛠️</span>
               <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Configure adaptive learning modules</h2>
               <p style={{ color: 'var(--muted)', lineHeight: 1.5 }}>
-                Use the sidebar options to manage existing curriculums or tap "+ Create" to write a new course. You can upload multiple lesson formats, attach VTT files, add sign language interpreter video streams, and monitor student reports.
+                Select a course from the sidebar to manage lessons, upload captions, add sign language stream URLs, define alt texts for diagrams, create quizzes, and monitor student reports.
               </p>
             </div>
           </div>
         ) : (
           <div>
-            {/* Header cockpit block */}
+            {/* Header dashboard cockpit */}
             <div className="glass-card p-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', background: '#fff', marginBottom: '2rem', flexWrap: 'wrap', gap: '1.5rem' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
@@ -291,7 +351,7 @@ function InstructorStudio({ user, navigateTo }) {
                   </span>
                 </div>
                 <h1 style={{ fontSize: '1.8rem', color: 'var(--ink)' }}>{activeCourse.title}</h1>
-                <p style={{ color: 'var(--muted)', fontSize: '0.92rem', marginTop: '0.25rem' }}>{activeCourse.description || 'No course summary description has been written.'}</p>
+                <p style={{ color: 'var(--muted)', fontSize: '0.92rem', marginTop: '0.25rem' }}>{activeCourse.description || 'No description summary.'}</p>
               </div>
               
               <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -300,36 +360,39 @@ function InstructorStudio({ user, navigateTo }) {
                 </button>
                 <button className="btn btn-danger btn-sm" onClick={handleDeleteCourse}>
                   <Trash2 size={14} />
-                  <span>Delete Course</span>
+                  <span>Delete</span>
                 </button>
               </div>
             </div>
 
-            {/* Course Content Tabs */}
+            {/* Course Studio Tabs */}
             <nav className="tab-nav">
               <button className={`tab-btn ${activeTab === 'curriculum' ? 'active' : ''}`} onClick={() => setActiveTab('curriculum')}>
-                Curriculum Builder
+                Curriculum Lessons
+              </button>
+              <button className={`tab-btn ${activeTab === 'quizzes' ? 'active' : ''}`} onClick={() => setActiveTab('quizzes')}>
+                Manage Quizzes
               </button>
               <button className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}>
-                Student Reports & Analytics
+                Student Reports
               </button>
             </nav>
 
-            {/* Curriculum Builder Pane */}
+            {/* TAB 1: CURRICULUM LESSONS */}
             {activeTab === 'curriculum' && (
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                  <h3 style={{ fontSize: '1.15rem' }}>Curriculum Lessons</h3>
+                  <h3 style={{ fontSize: '1.15rem' }}>Lessons & Materials</h3>
                   <button className="btn btn-outline-brand btn-sm" onClick={() => setShowMatModal(true)}>
                     <Plus size={14} />
-                    <span>Add Lesson Material</span>
+                    <span>Add Lesson</span>
                   </button>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {materials.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '3rem' }} className="glass-card">
-                      <p style={{ color: 'var(--muted)', fontSize: '0.95rem' }}>No lessons uploaded yet for this course. Click "+ Add Lesson Material" to build curriculum.</p>
+                      <p style={{ color: 'var(--muted)', fontSize: '0.95rem' }}>No lessons uploaded. Click "+ Add Lesson" to build curriculum.</p>
                     </div>
                   ) : (
                     materials.map(m => (
@@ -339,21 +402,23 @@ function InstructorStudio({ user, navigateTo }) {
                             <span className="badge-a11y-pill badge-hearing" style={{ margin: 0, fontSize: '0.65rem' }}>
                               {m.material_type}
                             </span>
+                            {m.image_alt_text && (
+                              <span className="badge-a11y-pill badge-vision" style={{ margin: 0, fontSize: '0.6rem', padding: '0.15rem 0.4rem' }}>
+                                ALT TEXT ACTIVE
+                              </span>
+                            )}
                             {m.a11y?.map(a => (
-                              <span key={a.id} className="badge-a11y-pill badge-vision" style={{ margin: 0, fontSize: '0.6rem', padding: '0.15rem 0.4rem' }}>
+                              <span key={a.id} className="badge-a11y-pill badge-cognitive" style={{ margin: 0, fontSize: '0.6rem', padding: '0.15rem 0.4rem' }}>
                                 + {a.kind.toUpperCase()}
                               </span>
                             ))}
                           </div>
                           <h4 style={{ fontSize: '1.05rem', fontWeight: 800 }}>{m.title}</h4>
-                          <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>
-                            {m.material_type === 'text' ? 'Interactive Text Editor Module' : m.file_url}
-                          </span>
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           <button className="btn btn-outline-brand btn-sm" onClick={() => openA11yModal(m)}>
                             <FileUp size={14} />
-                            <span>A11y Tracks</span>
+                            <span>Upload A11y Track</span>
                           </button>
                           <button className="btn btn-secondary btn-sm" style={{ color: 'var(--accent)', borderColor: 'var(--accent)' }} onClick={() => handleDeleteMaterial(m.id)}>
                             <Trash2 size={14} />
@@ -366,14 +431,45 @@ function InstructorStudio({ user, navigateTo }) {
               </div>
             )}
 
-            {/* Student Reports Pane */}
+            {/* TAB 2: MANAGE QUIZZES */}
+            {activeTab === 'quizzes' && (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  <h3 style={{ fontSize: '1.15rem' }}>Assessment Quizzes</h3>
+                  <button className="btn btn-outline-brand btn-sm" onClick={() => setShowQuizModal(true)}>
+                    <Plus size={14} />
+                    <span>Create Quiz</span>
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {quizzes.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '3rem' }} className="glass-card">
+                      <p style={{ color: 'var(--muted)', fontSize: '0.95rem' }}>No quizzes created for this course. Click "+ Create Quiz" to set up assessments.</p>
+                    </div>
+                  ) : (
+                    quizzes.map(quiz => (
+                      <article className="glass-card p-3" style={{ background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} key={quiz.id}>
+                        <div>
+                          <h4 style={{ fontSize: '1.05rem', fontWeight: 800 }}>{quiz.title}</h4>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>
+                            Questions: {quiz.questions?.length || 0}
+                          </span>
+                        </div>
+                      </article>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: STUDENT REPORTS */}
             {activeTab === 'analytics' && (
               <div>
                 <h3 style={{ fontSize: '1.15rem', marginBottom: '1.25rem' }}>Student Progress Metrics</h3>
-                
                 {analytics.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '3rem' }} className="glass-card">
-                    <p style={{ color: 'var(--muted)', fontSize: '0.95rem' }}>No student has enrolled in this course yet.</p>
+                    <p style={{ color: 'var(--muted)', fontSize: '0.95rem' }}>No students enrolled in this course yet.</p>
                   </div>
                 ) : (
                   <div className="custom-table-container">
@@ -400,9 +496,6 @@ function InstructorStudio({ user, navigateTo }) {
                                     {p}
                                   </span>
                                 ))}
-                                {(!row.disability_profile || row.disability_profile.length === 0) && (
-                                  <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>None flagged</span>
-                                )}
                               </div>
                             </td>
                             <td style={{ textAlign: 'center', fontWeight: 800 }}>
@@ -455,7 +548,6 @@ function InstructorStudio({ user, navigateTo }) {
                     type="text"
                     className="form-control"
                     id="new-title"
-                    placeholder="e.g. Sign Language & Adaptive Media Methods"
                     value={courseForm.title}
                     onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
                     required
@@ -467,7 +559,6 @@ function InstructorStudio({ user, navigateTo }) {
                     className="form-control"
                     id="new-desc"
                     rows="3"
-                    placeholder="Provide a brief summary of course topics..."
                     value={courseForm.description}
                     onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
                   />
@@ -498,7 +589,6 @@ function InstructorStudio({ user, navigateTo }) {
                     type="text"
                     className="form-control"
                     id="mat-title"
-                    placeholder="e.g. Intro to Caption Reading tools"
                     value={matForm.title}
                     onChange={(e) => setMatForm({ ...matForm, title: e.target.value })}
                     required
@@ -526,8 +616,7 @@ function InstructorStudio({ user, navigateTo }) {
                     <textarea
                       className="form-control"
                       id="mat-content"
-                      rows="6"
-                      placeholder="Write full text lesson here..."
+                      rows="5"
                       value={matForm.content_text}
                       onChange={(e) => setMatForm({ ...matForm, content_text: e.target.value })}
                       required
@@ -540,14 +629,25 @@ function InstructorStudio({ user, navigateTo }) {
                       type="url"
                       className="form-control"
                       id="mat-url"
-                      placeholder="e.g. https://example.com/lecture.mp3"
                       value={matForm.file_url}
                       onChange={(e) => setMatForm({ ...matForm, file_url: e.target.value })}
                       required
                     />
-                    <span className="form-text">Specify the absolute web URL link of the PDF/Audio/Video file.</span>
                   </div>
                 )}
+
+                {/* Alt text field for diagrams/images */}
+                <div className="form-group">
+                  <label className="form-label" htmlFor="mat-alt">Image / Diagram Alt Text (For screen readers)</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="mat-alt"
+                    placeholder="Provide description of any images/diagrams in this lesson..."
+                    value={matForm.image_alt_text}
+                    onChange={(e) => setMatForm({ ...matForm, image_alt_text: e.target.value })}
+                  />
+                </div>
               </div>
               <footer className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowMatModal(false)}>Cancel</button>
@@ -568,11 +668,6 @@ function InstructorStudio({ user, navigateTo }) {
             </header>
             <form onSubmit={handleAddA11y}>
               <div className="modal-body">
-                <div style={{ background: 'var(--paper)', padding: '0.75rem 1rem', borderRadius: '6px', fontSize: '0.85rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <ShieldCheck size={16} style={{ color: 'var(--brand)' }} />
-                  <span>Configuring metadata for: <strong>{selectedMatForA11y?.title}</strong></span>
-                </div>
-
                 <div className="form-group">
                   <label className="form-label" htmlFor="a11y-kind">Resource Type</label>
                   <select
@@ -594,8 +689,7 @@ function InstructorStudio({ user, navigateTo }) {
                     <textarea
                       className="form-control"
                       id="a11y-text"
-                      rows="6"
-                      placeholder="Write full text summary or transcript here..."
+                      rows="5"
                       value={a11yForm.content_text}
                       onChange={(e) => setA11yForm({ ...a11yForm, content_text: e.target.value })}
                       required
@@ -608,7 +702,6 @@ function InstructorStudio({ user, navigateTo }) {
                       type="url"
                       className="form-control"
                       id="a11y-url"
-                      placeholder="e.g. https://example.com/video-captions.vtt"
                       value={a11yForm.file_url}
                       onChange={(e) => setA11yForm({ ...a11yForm, file_url: e.target.value })}
                       required
@@ -619,6 +712,116 @@ function InstructorStudio({ user, navigateTo }) {
               <footer className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowA11yModal(false)}>Cancel</button>
                 <button type="submit" className="btn btn-primary">Save Track</button>
+              </footer>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: CREATE QUIZ */}
+      {showQuizModal && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="create-quiz-title" style={{ zIndex: 110 }}>
+          <div className="modal-content-box" style={{ maxWidth: '680px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <header className="modal-header">
+              <h3 id="create-quiz-title">Create Course Assessment Quiz</h3>
+              <button className="btn btn-secondary btn-sm" onClick={() => setShowQuizModal(false)} style={{ padding: '0.25rem 0.5rem', border: 'none' }}>✕</button>
+            </header>
+            <form onSubmit={handleCreateQuiz}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label className="form-label" htmlFor="quiz-title">Quiz Title</label>
+                  <input 
+                    type="text" 
+                    id="quiz-title" 
+                    className="form-control" 
+                    required 
+                    value={quizForm.title}
+                    onChange={(e) => setQuizForm({ ...quizForm, title: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label" htmlFor="quiz-desc">Quiz Description (Optional)</label>
+                  <input 
+                    type="text" 
+                    id="quiz-desc" 
+                    className="form-control" 
+                    value={quizForm.description}
+                    onChange={(e) => setQuizForm({ ...quizForm, description: e.target.value })}
+                  />
+                </div>
+
+                <fieldset style={{ border: '1px solid var(--line)', padding: '1rem', borderRadius: '6px', marginTop: '1.5rem' }}>
+                  <legend style={{ padding: '0 0.5rem', fontWeight: 800, color: 'var(--muted)', fontSize: '0.85rem' }}>
+                    Quiz Questions ({quizQuestions.length})
+                  </legend>
+                  
+                  {quizQuestions.map((q, idx) => (
+                    <div key={idx} style={{ borderBottom: '1px dashed var(--line)', paddingBottom: '1.25rem', marginBottom: '1.25rem' }}>
+                      <div className="form-group">
+                        <label className="form-label" htmlFor={`q-${idx}-text`} style={{ fontSize: '0.85rem' }}>Question {idx + 1} Text</label>
+                        <input 
+                          type="text" 
+                          id={`q-${idx}-text`} 
+                          className="form-control" 
+                          required
+                          value={q.text}
+                          onChange={(e) => handleQuizQuestionChange(idx, 'text', e.target.value)}
+                        />
+                      </div>
+                      
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div className="form-group">
+                          <label className="form-label" htmlFor={`q-${idx}-type`} style={{ fontSize: '0.85rem' }}>Question Type</label>
+                          <select 
+                            id={`q-${idx}-type`}
+                            className="form-select"
+                            value={q.question_type}
+                            onChange={(e) => handleQuizQuestionChange(idx, 'question_type', e.target.value)}
+                          >
+                            <option value="multiple_choice">Multiple Choice</option>
+                            <option value="true_false">True / False</option>
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label" htmlFor={`q-${idx}-ans`} style={{ fontSize: '0.85rem' }}>Correct Answer Value</label>
+                          <input 
+                            type="text" 
+                            id={`q-${idx}-ans`}
+                            className="form-control" 
+                            required
+                            placeholder="e.g. Option text or True/False"
+                            value={q.correct_answer}
+                            onChange={(e) => handleQuizQuestionChange(idx, 'correct_answer', e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      {q.question_type === 'multiple_choice' && (
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                          <label className="form-label" htmlFor={`q-${idx}-opts`} style={{ fontSize: '0.85rem' }}>Multiple Choice Options (Comma separated)</label>
+                          <input 
+                            type="text" 
+                            id={`q-${idx}-opts`}
+                            className="form-control" 
+                            required
+                            placeholder="e.g. Option A, Option B, Option C"
+                            value={q.optionInput}
+                            onChange={(e) => handleQuizQuestionChange(idx, 'optionInput', e.target.value)}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  <button type="button" className="btn btn-secondary btn-sm" onClick={handleAddQuestionRow}>
+                    <Plus size={14} />
+                    <span>Add Question</span>
+                  </button>
+                </fieldset>
+              </div>
+              <footer className="modal-footer" style={{ marginTop: '1.5rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowQuizModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary">Create Quiz</button>
               </footer>
             </form>
           </div>

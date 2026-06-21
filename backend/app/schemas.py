@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field
 
-Role = Literal["learner", "instructor", "support"]
+Role = Literal["learner", "instructor", "support", "guardian", "student"]
 LearningFormat = Literal["mixed", "video", "audio", "text", "visual", "interactive"]
 
 
@@ -16,6 +16,9 @@ class AccessibilityPreferences(BaseModel):
     screen_reader_optimized: bool = False
     dyslexia_font: bool = False
     font_size: str = "medium"
+    accessibility_mode: str = "standard"
+    guardian_contact_name: str | None = None
+    guardian_contact_info: str | None = None
 
 
 class UserCreate(AccessibilityPreferences):
@@ -47,6 +50,7 @@ class TokenOut(BaseModel):
 
 class MessageOut(BaseModel):
     message: str
+
 
 
 # --- COURSE SCHEMAS ---
@@ -142,4 +146,115 @@ class CourseProgressOut(BaseModel):
     total_materials: int
     completed_materials: int
     progress_percentage: float
+
+
+# --- QUIZ & QUESTION SCHEMAS ---
+class QuestionCreate(BaseModel):
+    text: str
+    audio_url: str | None = None
+    question_type: str = "multiple_choice"  # 'multiple_choice', 'true_false'
+    options: list[str] = Field(default_factory=list)
+    correct_answer: str
+
+
+class QuestionOut(BaseModel):
+    id: int
+    quiz_id: int
+    text: str
+    audio_url: str | None
+    question_type: str
+    options: list[str]
+    correct_answer: str
+
+    model_config = {"from_attributes": True}
+
+
+class QuizCreate(BaseModel):
+    title: str = Field(min_length=2, max_length=150)
+    description: str | None = None
+    questions: list[QuestionCreate] = Field(default_factory=list)
+
+
+class QuizOut(BaseModel):
+    id: int
+    course_id: int
+    title: str
+    description: str | None
+    created_at: datetime
+    questions: list[QuestionOut] = Field(default_factory=list)
+
+    model_config = {"from_attributes": True}
+
+
+class QuizAnswerSubmit(BaseModel):
+    question_id: int
+    answer: str
+
+
+class QuizSubmit(BaseModel):
+    answers: list[QuizAnswerSubmit]
+
+
+class QuizResultOut(BaseModel):
+    id: int
+    student_id: int
+    quiz_id: int
+    score: float
+    total_questions: int
+    completed_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+# --- NOTIFICATION SCHEMAS ---
+class NotificationCreate(BaseModel):
+    user_id: int | None = None
+    title: str
+    message: str
+    type: str = "alert"
+
+
+class NotificationOut(BaseModel):
+    id: int
+    user_id: int | None
+    title: str
+    message: str
+    type: str
+    created_at: datetime
+    is_read: bool
+
+    model_config = {"from_attributes": True}
+
+
+# --- DISCUSSION FORUM SCHEMAS ---
+class DiscussionPostCreate(BaseModel):
+    message: str
+
+
+class DiscussionPostOut(BaseModel):
+    id: int
+    course_id: int
+    student_id: int
+    full_name: str
+    message: str
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+# --- CHAT MESSAGE SCHEMAS ---
+class ChatMessageCreate(BaseModel):
+    recipient_id: int
+    message: str
+
+
+class ChatMessageOut(BaseModel):
+    id: int
+    sender_id: int
+    recipient_id: int
+    message: str
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
 

@@ -1,32 +1,61 @@
 import React, { useState } from 'react';
 import { api, setSession } from '../utils/api';
-import { Eye, EyeOff, Check, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, Check, AlertCircle, ShieldAlert, ArrowLeft } from 'lucide-react';
 
-function Register({ onRegisterSuccess, onNavigateLogin }) {
+function Register({ onRegisterSuccess, onNavigateLogin, onNavigateLanding }) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('learner');
+  const [role, setRole] = useState('learner'); // learner (student), instructor, guardian
   const [showPassword, setShowPassword] = useState(false);
   
-  // Accessibility Profile Defaults
-  const [disabilityProfile, setDisabilityProfile] = useState([]);
-  const [preferredFormat, setPreferredFormat] = useState('mixed');
-  const [captionsRequired, setCaptionsRequired] = useState(true);
-  const [screenReaderOptimized, setScreenReaderOptimized] = useState(false);
+  // Strict Accessibility Mode Selection
+  const [accessibilityMode, setAccessibilityMode] = useState('standard'); // 'standard', 'visual', 'hearing', 'cognitive'
+  
+  // Optional Guardian / Support Contact details
+  const [guardianContactName, setGuardianContactName] = useState('');
+  const [guardianContactInfo, setGuardianContactInfo] = useState('');
+
+  // Fine-tuned accessibility overrides (pre-configured by the selected mode)
   const [highContrast, setHighContrast] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [captionsRequired, setCaptionsRequired] = useState(true);
+  const [screenReaderOptimized, setScreenReaderOptimized] = useState(false);
   const [dyslexiaFont, setDyslexiaFont] = useState(false);
   const [fontSize, setFontSize] = useState('md');
 
   const [status, setStatus] = useState({ message: '', type: '' });
   const [submitting, setSubmitting] = useState(false);
 
-  const handleDisabilityCheckbox = (value) => {
-    if (disabilityProfile.includes(value)) {
-      setDisabilityProfile(disabilityProfile.filter(item => item !== value));
+  // Automatically update customization baselines when accessibility mode is changed
+  const handleModeChange = (mode) => {
+    setAccessibilityMode(mode);
+    if (mode === 'visual') {
+      setHighContrast(true);
+      setScreenReaderOptimized(true);
+      setReduceMotion(false);
+      setDyslexiaFont(false);
+      setFontSize('lg');
+    } else if (mode === 'hearing') {
+      setHighContrast(false);
+      setScreenReaderOptimized(false);
+      setReduceMotion(false);
+      setCaptionsRequired(true);
+      setDyslexiaFont(false);
+      setFontSize('md');
+    } else if (mode === 'cognitive') {
+      setHighContrast(false);
+      setScreenReaderOptimized(false);
+      setReduceMotion(true);
+      setDyslexiaFont(true);
+      setFontSize('md');
     } else {
-      setDisabilityProfile([...disabilityProfile, value]);
+      // standard defaults
+      setHighContrast(false);
+      setScreenReaderOptimized(false);
+      setReduceMotion(false);
+      setDyslexiaFont(false);
+      setFontSize('md');
     }
   };
 
@@ -44,19 +73,23 @@ function Register({ onRegisterSuccess, onNavigateLogin }) {
     setSubmitting(true);
     setStatus({ message: 'Creating your adaptive workspace...', type: 'info' });
 
+    // Storing user preferences and accessibility mode
     const payload = {
       full_name: fullName.trim(),
       email: email.trim().toLowerCase(),
       password: password,
       role: role,
-      disability_profile: disabilityProfile,
-      preferred_format: preferredFormat,
+      accessibility_mode: accessibilityMode,
+      guardian_contact_name: role === 'learner' && guardianContactName.trim() ? guardianContactName.trim() : null,
+      guardian_contact_info: role === 'learner' && guardianContactInfo.trim() ? guardianContactInfo.trim() : null,
+      preferred_format: accessibilityMode === 'hearing' ? 'video' : accessibilityMode === 'visual' ? 'audio' : 'mixed',
       captions_required: captionsRequired,
       screen_reader_optimized: screenReaderOptimized,
       high_contrast: highContrast,
       reduce_motion: reduceMotion,
       dyslexia_font: dyslexiaFont,
       font_size: fontSize,
+      disability_profile: [accessibilityMode],
     };
 
     try {
@@ -68,6 +101,8 @@ function Register({ onRegisterSuccess, onNavigateLogin }) {
 
       setSession(data.access_token, data.user);
       setStatus({ message: 'Welcome to AccessLearn! Building profile...', type: 'success' });
+      
+      // Deliberate tiny timeout for micro-animations feedback
       setTimeout(() => {
         onRegisterSuccess(data.user);
       }, 800);
@@ -81,30 +116,39 @@ function Register({ onRegisterSuccess, onNavigateLogin }) {
     <div className="auth-shell">
       {/* Brand Column */}
       <section className="auth-intro" aria-label="AccessLearn registration details">
-        <div className="brand">
+        <button 
+          onClick={onNavigateLanding}
+          style={{ background: 'none', border: 'none', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800, cursor: 'pointer', position: 'absolute', top: '2rem', left: '2rem', padding: 0 }}
+          aria-label="Back to home page"
+        >
+          <ArrowLeft size={16} />
+          <span>Home</span>
+        </button>
+
+        <div className="brand" style={{ marginTop: '2.5rem' }}>
           <span className="brand-mark" aria-hidden="true">AL</span>
           <span>AccessLearn</span>
         </div>
         <div className="intro-copy">
-          <p className="eyebrow" style={{ color: '#f6d56f' }}>Start with Access</p>
-          <h1>Set your learning comfort.</h1>
-          <p>Your choices store the interface details and content profiles that make online lessons feel stable, readable, and perfectly balanced for different learning needs.</p>
+          <p className="eyebrow" style={{ color: '#f6d56f' }}>Inclusive Classrooms</p>
+          <h1>Configure your workspace.</h1>
+          <p>Choose the accessibility mode that matches your style. The platform adapts pages, timers, fonts, layouts, and available tools globally to fit your choices.</p>
         </div>
         <ul className="access-pills" aria-label="Disability support options">
+          <li>Standard Interface</li>
           <li>Blind / Low Vision Support</li>
           <li>Deaf / Hard of Hearing Support</li>
           <li>Cognitive / Reading Support</li>
-          <li>Mobility Support</li>
         </ul>
       </section>
 
-      {/* Control Panel Column */}
+      {/* Register Panel Column */}
       <section className="auth-panel" aria-labelledby="register-title" style={{ overflowY: 'auto' }}>
         <div className="auth-card" style={{ margin: '2rem 0' }}>
           <p className="eyebrow">Create Account</p>
           <h2 id="register-title" style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Join AccessLearn</h2>
           <p style={{ color: 'var(--muted)', fontSize: '0.92rem', marginBottom: '2rem' }}>
-            Tell us how to build your workspace. You can change these details at any time.
+            Tell us how to build your workspace. You can update these details at any time.
           </p>
 
           <form onSubmit={handleSubmit} noValidate>
@@ -143,9 +187,9 @@ function Register({ onRegisterSuccess, onNavigateLogin }) {
                   onChange={(e) => setRole(e.target.value)}
                   disabled={submitting}
                 >
-                  <option value="learner">Learner</option>
+                  <option value="learner">Student</option>
                   <option value="instructor">Instructor</option>
-                  <option value="support">Support staff</option>
+                  <option value="guardian">Guardian / Support</option>
                 </select>
               </div>
             </div>
@@ -169,6 +213,7 @@ function Register({ onRegisterSuccess, onNavigateLogin }) {
                   onClick={() => setShowPassword(!showPassword)}
                   aria-pressed={showPassword}
                   disabled={submitting}
+                  title={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -176,169 +221,54 @@ function Register({ onRegisterSuccess, onNavigateLogin }) {
               <span className="form-text">Choose at least 8 characters.</span>
             </div>
 
-            <fieldset style={{ border: 'none', margin: '1.5rem 0' }}>
-              <legend style={{ fontSize: '1.05rem', fontWeight: 800, marginBottom: '0.75rem', color: 'var(--ink)' }}>
-                Support Profile (Select all that apply)
-              </legend>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
-                  <input
-                    type="checkbox"
-                    checked={disabilityProfile.includes('hearing')}
-                    onChange={() => handleDisabilityCheckbox('hearing')}
-                    disabled={submitting}
-                  />
-                  <span>Deaf / hard of hearing</span>
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
-                  <input
-                    type="checkbox"
-                    checked={disabilityProfile.includes('vision')}
-                    onChange={() => handleDisabilityCheckbox('vision')}
-                    disabled={submitting}
-                  />
-                  <span>Blind / low vision</span>
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
-                  <input
-                    type="checkbox"
-                    checked={disabilityProfile.includes('mobility')}
-                    onChange={() => handleDisabilityCheckbox('mobility')}
-                    disabled={submitting}
-                  />
-                  <span>Mobility support</span>
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
-                  <input
-                    type="checkbox"
-                    checked={disabilityProfile.includes('cognitive')}
-                    onChange={() => handleDisabilityCheckbox('cognitive')}
-                    disabled={submitting}
-                  />
-                  <span>Cognitive / attention</span>
-                </label>
-              </div>
-            </fieldset>
-
+            {/* Strict Accessibility Mode Choice */}
             <div className="form-group">
-              <label className="form-label" htmlFor="reg-format">Preferred lesson format</label>
+              <label className="form-label" htmlFor="reg-mode">Accessibility Mode</label>
               <select
                 className="form-select"
-                id="reg-format"
-                value={preferredFormat}
-                onChange={(e) => setPreferredFormat(e.target.value)}
+                id="reg-mode"
+                style={{ fontWeight: 800, borderColor: 'var(--brand)' }}
+                value={accessibilityMode}
+                onChange={(e) => handleModeChange(e.target.value)}
                 disabled={submitting}
               >
-                <option value="mixed">Mixed formats</option>
-                <option value="video">Video with captions</option>
-                <option value="audio">Audio lessons</option>
-                <option value="text">Readable text summaries</option>
-                <option value="visual">Visual diagrams / outlines</option>
-                <option value="interactive">Interactive practice quizzes</option>
+                <option value="standard">Standard Mode (No accommodations)</option>
+                <option value="visual">Visual Impairment Mode (TTS, Contrast, Keyboard outlines)</option>
+                <option value="hearing">Deaf / Hard of Hearing Mode (Forced Captions & Transcripts)</option>
+                <option value="cognitive">Cognitive / Attention Mode (Simplified text, No timers, Calm motion)</option>
               </select>
             </div>
 
-            <fieldset style={{ border: 'none', margin: '1.5rem 0' }}>
-              <legend style={{ fontSize: '1.05rem', fontWeight: 800, marginBottom: '0.75rem', color: 'var(--ink)' }}>
-                Interface Customizations
-              </legend>
-              
-              <div className="switch-container">
-                <div className="switch-label-block">
-                  <span className="switch-title">Always show captions</span>
-                  <span className="switch-desc">For hearing/cognitive video subtitles</span>
-                </div>
-                <label className="toggle-switch">
+            {/* Optional Guardian Contact details (Available if role is learner/student) */}
+            {role === 'learner' && (
+              <fieldset style={{ border: '1px solid var(--line)', padding: '1rem', borderRadius: 'var(--radius-sm)', margin: '1.5rem 0' }}>
+                <legend style={{ padding: '0 0.5rem', fontSize: '0.85rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase' }}>
+                  Optional Guardian / Support Contact
+                </legend>
+                <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                  <label className="form-label" htmlFor="reg-guardian-name" style={{ fontSize: '0.85rem' }}>Guardian full name</label>
                   <input
-                    type="checkbox"
-                    checked={captionsRequired}
-                    onChange={(e) => setCaptionsRequired(e.target.checked)}
+                    type="text"
+                    className="form-control"
+                    id="reg-guardian-name"
+                    value={guardianContactName}
+                    onChange={(e) => setGuardianContactName(e.target.value)}
                     disabled={submitting}
                   />
-                  <span className="toggle-slider"></span>
-                </label>
-              </div>
-
-              <div className="switch-container">
-                <div className="switch-label-block">
-                  <span className="switch-title">Screen reader optimized</span>
-                  <span className="switch-desc">For low vision/blind keyboard loops</span>
                 </div>
-                <label className="toggle-switch">
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" htmlFor="reg-guardian-info" style={{ fontSize: '0.85rem' }}>Guardian contact email or phone</label>
                   <input
-                    type="checkbox"
-                    checked={screenReaderOptimized}
-                    onChange={(e) => setScreenReaderOptimized(e.target.checked)}
+                    type="text"
+                    className="form-control"
+                    id="reg-guardian-info"
+                    value={guardianContactInfo}
+                    onChange={(e) => setGuardianContactInfo(e.target.value)}
                     disabled={submitting}
                   />
-                  <span className="toggle-slider"></span>
-                </label>
-              </div>
-
-              <div className="switch-container">
-                <div className="switch-label-block">
-                  <span className="switch-title">High contrast styling</span>
-                  <span className="switch-desc">Boost accessibility contrast ratios</span>
                 </div>
-                <label className="toggle-switch">
-                  <input
-                    type="checkbox"
-                    checked={highContrast}
-                    onChange={(e) => setHighContrast(e.target.checked)}
-                    disabled={submitting}
-                  />
-                  <span className="toggle-slider"></span>
-                </label>
-              </div>
-
-              <div className="switch-container">
-                <div className="switch-label-block">
-                  <span className="switch-title">Calmer reduced motion</span>
-                  <span className="switch-desc">Turns off micro-animations/transitions</span>
-                </div>
-                <label className="toggle-switch">
-                  <input
-                    type="checkbox"
-                    checked={reduceMotion}
-                    onChange={(e) => setReduceMotion(e.target.checked)}
-                    disabled={submitting}
-                  />
-                  <span className="toggle-slider"></span>
-                </label>
-              </div>
-
-              <div className="switch-container">
-                <div className="switch-label-block">
-                  <span className="switch-title">Dyslexia reading font</span>
-                  <span className="switch-desc">Applies enhanced spacing layout</span>
-                </div>
-                <label className="toggle-switch">
-                  <input
-                    type="checkbox"
-                    checked={dyslexiaFont}
-                    onChange={(e) => setDyslexiaFont(e.target.checked)}
-                    disabled={submitting}
-                  />
-                  <span className="toggle-slider"></span>
-                </label>
-              </div>
-
-              <div className="form-group" style={{ marginTop: '1rem' }}>
-                <label className="form-label" htmlFor="reg-fontsize">Text scale size</label>
-                <select
-                  className="form-select"
-                  id="reg-fontsize"
-                  value={fontSize}
-                  onChange={(e) => setFontSize(e.target.value)}
-                  disabled={submitting}
-                >
-                  <option value="sm">Small text scaling</option>
-                  <option value="md">Standard text scaling</option>
-                  <option value="lg">Large text scaling</option>
-                  <option value="xl">Extra-large text scaling</option>
-                </select>
-              </div>
-            </fieldset>
+              </fieldset>
+            )}
 
             {status.message && (
               <div 
@@ -354,7 +284,7 @@ function Register({ onRegisterSuccess, onNavigateLogin }) {
                 role="status" 
                 aria-live="polite"
               >
-                {status.type === 'error' ? <AlertCircle size={18} /> : <Check size={18} />}
+                {status.type === 'error' ? <ShieldAlert size={18} /> : <Check size={18} />}
                 <span>{status.message}</span>
               </div>
             )}
@@ -363,7 +293,7 @@ function Register({ onRegisterSuccess, onNavigateLogin }) {
               className="btn btn-primary btn-full" 
               type="submit"
               disabled={submitting}
-              style={{ marginTop: '1.5rem' }}
+              style={{ marginTop: '1rem' }}
             >
               {submitting ? 'Registering workspace...' : 'Create account'}
             </button>

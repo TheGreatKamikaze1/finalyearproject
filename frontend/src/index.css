@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=Lexend:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
 :root {
   /* Premium Adaptive HSL Palette */
@@ -73,10 +73,10 @@ body.dyslexia-font label,
 body.dyslexia-font input,
 body.dyslexia-font button,
 body.dyslexia-font select {
-  font-family: "OpenDyslexic", "Comic Sans MS", "Chalkboard SE", sans-serif !important;
+  font-family: "Lexend", "Atkinson Hyperlegible", "OpenDyslexic", "Comic Sans MS", sans-serif !important;
   letter-spacing: 0.14em !important;
   word-spacing: 0.18em !important;
-  line-height: 1.75 !important;
+  line-height: 1.85 !important;
 }
 
 /* FONT SIZE SCALING CLASS ROLES */
