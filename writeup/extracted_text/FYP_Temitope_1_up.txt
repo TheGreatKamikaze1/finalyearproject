@@ -1,0 +1,808 @@
+DESIGN AND IMPLEMENTATION OF A MENTAL WELLNESS APP FOR UNIVERSITY STUDENTS
+
+
+BY
+OMOLEYE GRACE TEMITOPE
+21/52HL123
+
+
+A PROJECT SUBMITTED IN PARTIAL FULFILLMENT OF THE REQUIREMENTS FOR THE AWARD OF BACHELOR OF SCIENCE DEGREE IN INFORMATION AND COMMUNICATION SCIENCE
+
+
+JULY, 2026
+
+
+
+
+
+
+
+CERTIFICATION 
+This is to certify that this project work was carried out by OMOLEYE, Grace Temitope with matriculation number 21/52HL123 in the Department of Information Technology, University of Ilorin, Ilorin Nigeria
+
+
+_____________________                                                           ___________________
+Dr. Naheem A Balogun					       Signature and Date
+       (Supervisor)
+
+
+___________________					      _________________
+   Dr O. T. Afolayan 				                            Signature and Date
+  (Head of Department)
+
+
+
+
+
+
+
+
+DEDICATION
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ACKNOWLEDGEMENTS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TABLE OF CONTENT
+
+
+
+
+
+
+
+
+
+
+
+LIST OF TABLES
+Table 1 Roles of User	42
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+LIST OF FIGURES
+Figure 1.1 Agile Development Methodology	39
+Figure 2 Usecase Diagram	46
+Figure 3 Flowchart Diagram	48
+Figure 4 Database Design	50
+Figure 5 Onboarding Page	55
+Figure 6 Sign Up and Login Page	56
+Figure 7 OTP Verification	57
+Figure 8 Personalization Page	58
+Figure 9 Home Page	59
+Figure 10 Log Your Mood Page	60
+Figure 11 Journal Page	61
+Figure 12 Meditation Screen	62
+Figure 13 Quick Calm Pages	62
+Figure 14 Focus Meditation Pages	63
+Figure 15 Deep relaxation pages	64
+Figure 16 Sleep relaxation pages	64
+Figure 17 AI Chatbot pages	65
+Figure 18 Session Page	66
+Figure 19 Resources Page	67
+Figure 20 Setting Page	68
+Figure 21 Admin Home Page	69
+Figure 22 Invite Page	70
+Figure 23 Editor Page	71
+Figure 24 Psychologist Sign-Up and Login Page	72
+Figure 25 Psychologist Personalization Page	73
+Figure 26 Psychologist Home Page	74
+Figure 27 Psychologist Availability Page	75
+Figure 28 Psychologist Settings Page	76
+
+
+
+
+
+ABBREVIATIONS AND ACRONYMS
+API - Application Programming Interface
+HCI - Human–Computer Interaction
+IOS - iPhone Operating System
+JSON - JavaScript Object Notation
+TASO - Transforming Access and Student Outcomes
+UI - User Interface
+UX - User Experience
+WHO - World Health Organization
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ABSTRACT
+Mental health issues and problems among university students are a growing worldwide health issue, as the incidence of stress, anxiety, and even depression impacts academic success, social networks, and well-being of university students. In Nigeria, the situation is further aggravated by the lack of accessibility to the professional mental health services, social stigma, and insufficient awareness. This study will give the design and development of Wellnest, a cross-platform mental wellness mobile application that was created to help students track and enhance their emotional health utilizing digital technology.
+ In the study, the Design Thinking approach was used to define the needs of the users by empathy, problem definition, ideation, prototyping, and testing. Thereafter, after the requirement validation, Agile development model was adopted in such a way that flexibility, continuous feedback, and improvement in the development process were guaranteed. The system was also user-friendly and therefore it was designed in a user-centered manner, focusing on usability, accessibility, and simplicity. 
+The major characteristics of the application are daily moods, activity tags, mood history, personal insights, simple mental wellness, and user authentication. The frontend part was created based on cross platform mobile framework in order to be compatible with both Android and iOS and the backend services and APIs were integrated to process user data safely and efficiently. The application will offer students a confidential and personalized, as well as supportive online space to reflect on themselves and track their emotions. Allowing stable mood tracking and trend detection, Wellnest motivates an individual to be mindful of the mental health trends early and maintain proactive control of well-being. 
+The outcomes of the development process prove that the combination of the principles of the user-centered design and the application of Agile methodologies increases the usability and flexibility of the system. This study will be important to the discipline of Human-Computer Interaction and mobile health technology because it will show how intelligently designed digital responses can be utilized to solve the problem of mental wellness among institutions of higher learning. The Wellnest application is a viable, scalable, and technology-intensive strategy to assist student mental health in a limited resource setting.
+
+CHAPTER ONE
+INTRODUCTION
+1.1 Background to the Study
+Mental health issues are a significant global challenge, affecting people of all ages, genders, and socioeconomic backgrounds. Shetty (2025) highlighted that more than a billion people worldwide suffer from some form of mental health disorder, with anxiety and depression being the most common. Despite their high prevalence, access to treatment varies greatly: less than 10% of those affected in low-income countries receive care compared to over 50% in high-income countries. It was estimated that about 970 million people experienced mental health conditions in 2019, emphasizing the worldwide impact of these disorders.
+Young people, especially university students, are among the most affected groups. Centre for Transforming Access and Student Outcomes [TASO] (2023) reported that in the UK, for example, the share of undergraduates reporting mental health difficulties almost tripled between the academic years 2016/17 and 2022/23, rising from 6% to 16%. Also, financial stress has been a major contributor, with more students thinking about dropping out because of money problems, increasing from 3.5% in 2022 to 8% in 2023. 
+Similarly, in Nigeria, mental health challenges among university students are significant. Orok et al (2023) indicate that 58% of students experience depression with varying severity from mild to severe. Davis (2025) pointed out that the contributing factors include academic pressure, social isolation, peer conflicts, social media influence, and family-related stress.
+Design Thinking has been applied effectively in creating user-centered digital mental health tools. Scholten and Granic (2019) developed interactive games like MindLight for youth by employing empathy-driven participatory design, multidisciplinary ideation, and iterative prototyping. Their method placed youth directly into the design process to meet motivational and emotional needs usually neglected in conventional interventions. Similarly, Sam, Richardson, and Currie (2022) merged Design Thinking with Indigenous storytelling to co-create an e-mental health screening app for Indigenous youth. Participants used Design Circles, persona development, and usability feedback to make sure it was culturally relevant and responsive. Bernaerts et al. (2025) took this further in the SUPER project by customizing mental health apps for several countries through the five stages of Design Thinking: empathize, define, ideate, prototype, and test, with strong emphasis on stakeholder participation, cultural adaptation, and iterative refinement.
+Although these achievements have been made, there are still significant gaps. Most studies addressed youth or adult populations rather than specifically university students, and very few actively engaged this cohort as co-designers. There is a dearth of research in African contexts, plus the long-term engagement with, adoption of, and sustained effectiveness of these apps has not been assessed. Existing interventions may thus be irrelevant or unusable, or poorly culturally fit for the Nigerian university student population.
+To address these gaps, this brings to light the imperative for studies that use Design Thinking in developing mental wellness apps specifically for university students, with their active participation in the design process while assessing usability and long-term impact. This project fills this niche by targeting Nigerian university students towards developing a culturally relevant, user-centered, effective digital tool that would cater to their mental health, academic performance, as well as general well-being.
+
+Thus, this project is directed at the creation of a mental wellness app for university students to fill the gap of accessible user-centered mental health support in Nigerian universities. The research aims to comprehend the mental health difficulties faced by students and bring forth a tool that could enhance their psychological well-being, academic performance, and general quality of life.
+
+1.2 Statement of the problem
+The state of an individual’s mental health is paramount, and it determines how actively they participate and involve themselves in various activities in life. Many university students struggle with mental health challenges due to academic pressure, stress, anxiety, and peer pressure, yet students don’t really have a digital solution that could ease them out of whatever situation they are going through. In addition, most wellness solutions fail to address their specific contexts and needs. Common issues include poor usability, irrelevant content, and a lack of emotional connection between the user and the application. The major problem, therefore, is the lack of user-centered, accessible, and engaging mental wellness platforms tailored for university students. 
+In response to these challenges, this study aims to address the problem by designing and developing a functional, intuitive, and secure mental wellness application specifically tailored to enhance students’ emotional well-being, promote self-care practices, and provide accessible psychological support tools. The application aims to enhance the overall mental health support experience for users by incorporating features such as intuitive navigation, daily mood tracking, guided journaling, personalized wellness recommendations, user authentication, and secure data protection measures.
+
+1.3 Aim and Objectives of the Study
+The aim is to design and implement a mobile application for mental wellness that provides seamless, secure, and user-friendly access to mental health support for students through the use of design thinking. 
+Below are some specific objectives of this project:
+To design a user-centered mental wellness application for university students by applying design thinking to identify user needs and develop an accessible, responsive interface.
+To implement a functional mobile-based mental wellness application incorporating wellness tracking and self-care features based on insights gathered from real users.
+To evaluate the usability, user engagement, and satisfaction of the developed mental wellness application among university students
+
+1.4 Scope of the Study
+The main idea of this study is to make use of the design thinking approach to provide a solution to the design and development of a mental wellness web application tailored to university students. Through the use of the design thinking approach, whose main focus is on the users, it aims to provide a digital platform where users can easily access mental wellness tools, track their mood, manage stress, and engage in activities that support their emotional well-being directly from their mobile devices. The major users of this application are university students seeking tools to manage academic stress and emotional well-being. To make sure of high application and expert quality, the perspectives of mental wellness support providers, such as lecturers, psychologists, and counselors, will be leveraged for validation, even though they are not the primary users. 
+The study also anchors on students from the University of Ilorin, Nigeria. The data collection, user testing, and evaluation will be limited to students within the University of Ilorin campus.
+Although the application may be adaptable for use by students in other institutions
+The study focuses on designing and developing the application using modern mobile development technologies. The primary implementation platform will be a mobile-based application, accessible across devices. The study will cover the design of the user interface, development of the frontend and backend components, and usability testing. However, it will not extend to large-scale deployment, commercialization, or enterprise-level security features.
+
+1.5 Significance of the study
+The proposed application encourages the use of the design thinking approach in coming up with solutions that are mostly centered on the users and are both empathetic and effective.
+It also stimulates mental wellness awareness through technology and design.
+The proposed application serves as a model for user-centered application design in education and health technology.
+This will also contribute to academic discussions on Human–Computer Interaction (HCI) by prioritizing users’ needs and user-centered design methodologies.
+The mobile application will help university student cope and manage their stress better when put under much pressure by academics or their social life.
+
+1.6 Limitations of the study
+The study aims to create an empathetic, effective, and functional mobile application for a mental wellness application for university students; it is important to acknowledge certain limitations that may affect its scope and overall impact, including:
+Firstly, the application will be developed exclusively for the Android platform. Due to time and resource constraints, the scope of the project does not include iOS development, which limits its reach to a portion of the mobile user market. Consequently, users of IOS devices will not have access to the application during the development phase.
+In addition, during the empathize stage of the design thinking approach, many students may be reluctant to openly discuss their true mental health struggles due to the stigma associated with mental illness, fear of judgment, or concerns about privacy/confidentiality (especially if the research is affiliated with the university). This can lead to misleading, biased, and incomplete insight during the interviews and surveys. Also, the students who choose to participate in design research might not be representative of the broader student population, particularly those with the most severe needs or those who are most withdrawn. This leads to a biased understanding of the core problems
+Another limitation is the difficulty of measuring if the app, designed through the design thinking process, is actually improving mental health outcomes (e.g., reducing anxiety, depression, or drop-out rates) versus simply improving user engagement. Because Design Thinking relies on fast, repeated testing, it does not allow enough time to measure how well the mental wellness app works over many months or years. To truly understand its long-term impact, a more extended evaluation would be necessary.
+Additionally, Mental health needs are highly personal. A solution that works for a small group of tested students might not scale effectively or adapt to the diverse cultural, economic, and academic pressures faced by the entire university population.
+The project will also face resource constraints in terms of development time and personnel. Given that the app will be developed by a limited team or individual, access to advanced tools, professional therapists, or large user groups may be limited. This may result in the reduction of the effectiveness of certain Design Thinking stages, especially testing and evaluation.
+Ultimately, the Design Thinking approach generates solutions based on user experience, not medical standards. This may result in a final product that is user-friendly, may still require professional validation from mental health experts to ensure safety and appropriateness.
+
+1.7 Operational Definition of Key Terms
+ 	Here are the definitions, tailored to the study:
+Mental health wellness app: is a type of mobile application, usually for smartphones or tablets, designed to help users manage, monitor, and improve their emotional, psychological, and social well-being.
+Mobile-based application: A mobile-based application is software designed to run on mobile devices such as smartphones and tablets, providing various functionalities and services to users on the go.
+Mobile browser: A mobile browser is a software application that enables users of mobile phones to locate and access web pages on the internet, tailored for smaller screens and touch interfaces.
+Design thinking: is a non-linear, iterative problem-solving methodology that focuses on understanding the human needs behind a problem, challenging assumptions, and creating innovative solutions through prototyping and testing.
+
+
+
+
+
+
+
+
+
+
+
+
+CHAPTER TWO 
+LITERATURE REVIEW
+2.1 Introduction
+Mental health refers to the way an individual thinks, feels, and behaves, influencing how they cope with stress, relate to others, and make decisions. It plays a vital role in shaping one’s overall well-being and ability to function effectively in daily life (Felman & Tee-Melegrito, 2024). For students, mental health is essential, as it affects their concentration, motivation, academic performance, and social relationships. However, many students experience various mental health challenges such as anxiety, stress, depression, and burnout due to academic pressure, financial struggles, social isolation, and the transition to independent living. When not properly managed, these issues can interfere with learning, reduce productivity, and negatively impact both emotional stability and academic success.
+Mental health has become a crucial concern among university students due to the combined pressures of academic performance, financial stress, poor living conditions, transportation challenges, digital and technological pressures, social adjustment, and personal development. These challenges often contribute to heightened levels of anxiety, depression, and emotional distress within campus communities. With the rise of digital technology, mobile applications have become increasingly popular to provide accessible and scalable mental wellness support. However, despite the proliferation of such applications, many fail to fully engage users or address their genuine needs due to the limited use of user-centered design strategies.
+The Design Thinking approach, which emphasizes empathy, definition, ideation, prototyping, and testing, offers a promising framework for creating digital solutions that are both functional and emotionally resonant. Applying the design thinking approach to designing and building a mental wellness app for university students ensures that their unique needs and contexts are applied during the design process.
+
+2.2 Understanding Mental Health
+Mental health refers to a person’s emotional, psychological, and social well-being. It affects how individuals think, feel, and act, as well as how they manage stress, interact with others, and make everyday decisions. According to the World Health Organization (WHO, 2025), “Mental health is a state of mental well-being that enables people to cope with the stresses of life, realize their abilities, learn and work well, and contribute to their community. It has intrinsic and instrumental value and is a basic human right.” Furthermore, the World Health Organization reports that one in four people will experience a mental health condition at some point in their lives, highlighting that these conditions can affect anyone regardless of age, gender, or background. Such experiences can have a significant impact on personal relationships, work performance, and overall quality of life. Therefore, mental health is crucial to personal, community, and socio-economic development.
+Moreover, mental health is more than the absence of mental disorders, as it can be seen as a broad spectrum that people experience in different ways. At any point in time, a mix of personal, family, social, and environmental factors can either promote or harm an individual’s mental well-being. While many people can recover from difficulties, those who face challenging or negative life situations are more likely to develop mental health problems. These problems may involve mental disorders, emotional or social disabilities, and other conditions that cause distress, reduce daily functioning, or lead to self-harming behavior. Although effective and affordable treatments exist, most health systems across the world still lack enough resources, leaving many people without proper mental health care.
+In addition, just like physical health, mental health is not a permanent state. It exists on a continuum that ranges from optimal well-being and positive functioning to severe mental health challenges. Throughout a person’s life, their mental health can shift along this spectrum depending on various life experiences, stressors, and personal circumstances. Recognizing this dynamic nature of mental health is essential, as it emphasizes the need for continuous support, awareness, and interventions that promote emotional resilience and overall well-being.
+2.3 Factors that Increase the Risk of Mental Health Issues
+Mental health is influenced by many different factors that can either protect or harm a person’s well-being. These factors exist at the individual, family, community, and societal levels. When they are positive, they help people stay emotionally strong and stable, but when they are negative, they can increase the chances of developing mental health problems.
+Research indicates that mental health issues are becoming more prevalent among children and young people. Studies estimate that about 13% of individuals aged 5 to 24 experience some form of mental disorder. The World Health Organization (WHO, 2025) also reports that half of all mental health conditions start before age 14, and nearly three-quarters develop by the mid-20s. This suggests that many mental health problems begin early in life, yet many young people do not receive adequate care. Reports reveal that between 64% and 87% of these conditions go undetected or untreated (Scholten & Granic, 2019).
+Risk factors can appear at different stages of life, but those that occur during sensitive developmental periods, especially in early childhood and adolescence, are particularly harmful. For example, harsh parenting, bullying, or physical punishment can affect a child’s emotional development and increase the likelihood of mental health conditions later in life.
+According to the World Health Organization (WHO), several factors at both the individual and social levels can increase the risk of mental health problems. Personal traits such as genetic vulnerability, poor emotional regulation, and substance use can heighten the likelihood of developing mental health conditions, while strong coping skills, emotional intelligence, and healthy habits can act as protective factors. Moreover, broader social and environmental conditions—including poverty, violence, discrimination, unemployment, and inadequate housing—can negatively affect mental well-being. In contrast, supportive communities that provide access to quality education, employment, and safe living environments tend to promote better mental health outcomes.
+In addition to personal and social influences, global factors such as economic hardship, disease outbreaks, displacement, and climate change also affect people’s mental well-being. These large-scale challenges often create uncertainty, stress, and emotional exhaustion that can impact individuals and communities around the world.
+Poor mental health among university students has become a growing public health concern. Studies show a steady increase in mental health problems such as depression and anxiety, with recent surveys reporting that one in five students has a current diagnosis, and almost half have experienced serious psychological distress. Factors contributing to this rise include academic pressure, financial stress from increased tuition fees and student loans, together with the challenges of transitioning to independent living. The COVID-19 pandemic further worsened the situation, leading to higher rates of anxiety, depression, and eating disorders among young adults. Despite the growing demand for support, many students do not seek help due to stigma or lack of awareness, highlighting the need for universities to adopt more accessible and innovative mental health interventions (Campbell et al., 2022; Pedrelli et al., 2022).
+Overall, these risk factors affect people in different ways depending on their situations and environments. However, university students are especially exposed to several of these stressors due to academic workload, financial pressure, and social transitions. The next section discusses the specific mental health challenges faced by university students.
+
+2.4 Mental Health Challenges among University Students
+University students are a group that is especially vulnerable to mental health issues. These stresses and problems can harm their health and academic success (Wyatt & Oswalt, 2013). Moving to college often involves more academic pressure, financial worries, social changes, and the need for independence. These stressors can lead to anxiety, depression, and other mental health problems if not managed properly.
+Attending college can be a particularly demanding time for students, as they balance academic pressures with the challenges of gaining independence from their families. Many students also juggle work or family responsibilities, which can raise stress levels. This transitional period may trigger the onset of mental health or substance use issues or worsen existing conditions. Since college students face unique developmental and environmental factors, it is important to consider specific aspects when addressing their mental health. Effective interventions often involve engaging parents, coordinating with other service providers, and utilizing technology to enhance treatment adherence. Awareness of these distinct challenges enables practitioners to provide more targeted support for this population (Pedrelli, Nyer, Yeung, Zulauf, & Wilens, 2015).
+A recent longitudinal study by Porru, Schuring, Bültmann, Portoghese, Burdorf, and Robroek (2022) supports these observations, showing that university students face a variety of challenges that can affect their mental health, some of which are directly related to their academic environment, while others are unrelated to the university itself. Non-university-related challenges include financial pressure and limited social support, which have been linked to poorer mental health outcomes. University-related challenges include excessive academic workload, inadequate feedback, strained relationships with staff, a lack of peer support, concerns about future professional competence, and limited interest in coursework. Both types of challenges can contribute to increased stress and psychological difficulties, highlighting the need to consider the diverse sources of pressure students experience when addressing their mental well-being.
+In addition, the widespread use of smartphones and social media has significantly changed how college students interact and connect. Still, it has also contributed to the rise of mental health issues, including depression and anxiety (Cain et al., 2020). Research suggests that excessive or passive engagement with social media—such as continuously comparing oneself to others or “lurking” without active interaction—can exacerbate feelings of isolation, stress, and low self-esteem. While these technologies offer opportunities for social connection, academic engagement, and access to digital mental health interventions, misuse or overuse appears to correlate with increased psychological distress among students. The ubiquity of personal computing technology has created a new environment in which mental health challenges are amplified, highlighting the need for moderation, guided use, and the development of technology-enabled interventions that support, rather than hinder, student well-being (Lattie, Lipson, & Eisenberg, 2019).
+In summary, university students face numerous challenges that can significantly affect their mental health and overall well-being. The transition to higher education introduces academic, financial, and social pressures that often heighten stress and emotional difficulties. These challenges, combined with the growing influence of digital technology and social media, make this population particularly vulnerable to issues such as anxiety and depression. Understanding these factors is essential for developing effective mental health interventions that address students’ unique experiences and promote a healthier, more supportive learning environment.
+
+
+2.5 Mental Health Challenges Among University Students in Nigeria
+Mental health challenges are increasingly prevalent among university students in Nigeria, who make up a significant portion of the adolescent population and are undergoing a critical transition from dependence to independence, marked by rapid physical, mental, and social changes (Kukoyi et al., 2022). 
+According to the World Health Organization (2017), the majority of mental health problems occur between the ages of 15 and 24 years, underscoring that mental well-being is a vital component of overall health. Studies have shown that tertiary institution students are particularly vulnerable to various health problems, including psychological stress, emotional disorders, and unhealthy lifestyles (Oswalt et al., 2020; Basta et al., 2022).
+Mental disorders account for about 11.5% of the global disease burden (WHO, 2007), and approximately 20% of Nigerians are reported to suffer from some form of mental illness (Shekihar, 2006). Despite this, mental health remains one of the most neglected areas in Nigeria’s public health system. Although a Mental Health Policy was formulated in 1991, its poor implementation has resulted in limited support services, stigmatization, and societal neglect of affected individuals (Mental Health Leadership and Advocacy Program, 2012). Consequently, mental health issues have been found to negatively affect students’ academic performance, leading to reduced concentration, absenteeism, and poor academic outcomes (Brackney & Karabenick, 1995). The absence of early identification and intervention systems in Nigerian universities further worsens the situation, highlighting the urgent need for institutional and policy-based responses to support students’ mental well-being.
+Nigeria’s educational system is also known to be highly rigorous. As one of the most populous countries in the world, with over 222 million people—about 70% of whom are under 30—the pressure on higher education is immense. In 2024, there were approximately 1.8 million undergraduate students and 242,000 postgraduate students in Nigerian universities, with over 1.2 million enrolled in federal universities and about 103,000 in private universities. Federal universities, in particular, face persistent and severe challenges such as inadequate funding, recurring Academic Staff Union of Universities (ASUU) strikes, poor and decaying infrastructure, insecurity, and inefficient administrative systems. These challenges collectively contribute to heightened stress levels and declining mental well-being among students.
+Despite the increasing awareness of mental health challenges among university students in Nigeria, access to effective mental health care remains limited due to inadequate infrastructure, a shortage of professionals, and persistent social stigma surrounding mental illness. Traditional counseling services in most universities are often underfunded or inaccessible, leaving many students without timely support. In recent years, however, digital technology has emerged as a promising solution to bridge this gap. Mobile applications, online therapy platforms, and artificial intelligence (AI)-based tools now provide innovative ways to promote mental wellness, offering students convenient and confidential access to psychological support. This shift toward digital mental health care forms the focus of the next section, after the effects and causes of mental health challenges.
+In summary, mental health challenges among university students in Nigeria represent a growing public health concern that is deeply intertwined with social, academic, and institutional factors. Despite the existence of policies and increasing awareness, the lack of effective implementation, inadequate mental health infrastructure, and persistent stigma continue to hinder progress. The combination of academic pressure, poor learning environments, and limited access to professional support has placed students at greater risk of psychological distress. However, the emergence of digital mental health innovations offers a new and promising pathway to addressing these challenges. As universities and policymakers explore sustainable solutions, integrating technology-driven interventions could play a crucial role in improving students’ mental well-being and fostering healthier learning environments.
+
+2.6 Causes and Effects of Mental Health Issues Among University Students
+Mental health issues among university students arise from a complex interaction of personal, academic, social, and environmental factors. These causes often overlap, creating a cycle of stress and emotional strain that affects students’ well-being and academic performance.
+2.6.1 Causes of Mental Health Issues
+University students in Nigeria face a range of factors that can negatively impact their mental health. Academic pressure is a major contributor, as students are expected to handle heavy workloads, frequent examinations, and tight deadlines, often with inadequate support. The frequent strikes by the Academic Staff Union of Universities (ASUU) disrupt academic schedules, creating uncertainty and stress. Financial challenges are another significant factor, as many students struggle to pay tuition, accommodation, and living expenses, sometimes relying on part-time jobs that add to their stress. Social factors, such as limited peer support, family expectations, and difficulties adapting to the university environment, also affect students’ emotional well-being. Additionally, poor infrastructure, overcrowded lecture halls, and limited access to counseling services exacerbate stress and anxiety, while exposure to insecurity, campus violence, and societal pressures further increase vulnerability to mental health problems.
+2.6.2 Effects of Mental Health Issues
+The consequences of poor mental health among university students are far-reaching. Students experiencing psychological stress, anxiety, or depression often show decreased concentration, memory difficulties, and lower academic performance. This can lead to absenteeism, delayed graduation, or even dropout. Emotional and behavioral effects include irritability, social withdrawal, an;d reduced motivation, which can harm relationships with peers, faculty, and family. Mental health challenges can also contribute to unhealthy coping mechanisms, such as substance abuse or self-harm. Over time, these issues can reduce overall quality of life, hinder personal development, and negatively impact students’ readiness to transition successfully into professional and adult life.
+
+2.7 Digital Mental Wellness Interventions
+Digital wellness refers to the impact of digital technology on our mental, physical, social, emotional, and spiritual well-being. Within this broader concept, digital mental wellness interventions are technology-based tools and applications designed to promote emotional well-being, reduce stress, and provide psychological support. These interventions have become increasingly popular among university students due to their accessibility, affordability, and convenience. By integrating mental health care into everyday technology use, they help bridge the gap between individuals and professional services, especially in environments where mental health resources are limited.
+There are various categories of digital mental wellness tools, each addressing different aspects of mental health. Mood-tracking apps such as Daylio and Moodpath enable users to monitor their emotions and identify behavioral patterns that may signal psychological changes. Similarly, mindfulness and meditation platforms like Headspace and Calm teach relaxation techniques and promote self-awareness, helping to decrease anxiety and improve concentration, particularly among students. Furthermore, AI-powered chatbots such as Wysa and Woebot use cognitive behavioral therapy (CBT) principles to provide conversational support, helping users challenge negative thoughts and develop healthier coping strategies. These tools are especially valuable for young adults who may hesitate to seek in-person therapy due to stigma or limited access to counseling.
+Research evidence underscores the growing effectiveness and relevance of these digital tools. Firth et al. (2017) found that mobile-based interventions significantly reduced symptoms of depression and anxiety across diverse populations. Scholten and Granic (2019) further observed that integrating design thinking principles enhances user engagement and satisfaction with digital interventions. More recently, Löchner et al. (2025) reviewed advancements in e-health technologies, emphasizing the importance of ethical standards, data privacy, and trust in ensuring sustainable use. Collectively, these findings highlight that well-designed digital tools not only expand access to care but also have the potential to improve mental health outcomes among students.
+Beyond accessibility and efficacy, digital mental wellness interventions also address key barriers faced by students. As mHealth (mobile health) tools, they provide flexible and continuous support that complements traditional therapy. Students can access guidance at any time and from anywhere, overcoming the geographical and scheduling limitations of in-person counseling. Additionally, their anonymous nature reduces stigma and encourages help-seeking behavior (Wiljer et al., 2020). Such convenience is especially critical in university settings, where many students experience stress yet have limited time or resources to seek professional help.
+Several studies further demonstrate their practical benefits. Biofeedback-based and mindfulness apps, for example, have been shown to improve emotional regulation and enhance self-awareness (Ponzo et al., 2020). Likewise, mobile applications have proven acceptable, engaging, and cost-effective for large student populations, offering scalable solutions without requiring extensive infrastructure (Oliveira et al., 2021). Together, these findings illustrate the vital role of digital mental wellness tools in promoting emotional resilience and psychological well-being among university students.
+Ultimately, the growing adoption of digital mental wellness interventions reflects a significant shift in how mental health support is delivered. As technology continues to influence students’ daily lives, these tools provide an innovative means of fostering well-being in accessible, personalized, and stigma-free ways. When thoughtfully designed and ethically implemented, they can complement traditional mental health services and empower students to take an active role in maintaining their emotional health.
+
+2.7.1 Limitations of Digital Mental Wellness Interventions
+Despite the growing promise of digital mental wellness interventions, several limitations continue to affect their effectiveness and long-term impact. One of the major challenges lies in user engagement and adherence, as many individuals lose motivation after initial use. Studies have shown that a significant number of participants drop out before completing most of the intervention modules, particularly in unguided programs that lack therapist support. This disengagement reduces the overall effectiveness of these interventions and limits their ability to produce lasting behavioral change (Scholten & Granic, 2019).
+In addition to low engagement, cultural fit and inclusivity present another critical limitation. Many digital mental health tools are not designed to reflect the values, beliefs, and lived experiences of diverse populations. For example, Johanna et al. (2025) emphasized the importance of developing e-mental health screening tools that are culturally safe for Indigenous youth. Their findings indicate that interventions failing to integrate cultural perspectives are often perceived as impersonal or irrelevant, which reduces trust and participation. This highlights the need for digital solutions that acknowledge cultural diversity and promote inclusiveness in both design and implementation.
+Moreover, the issue of limited personalization further constrains their effectiveness. Many existing digital interventions adopt a one-size-fits-all approach, offering minimal flexibility to accommodate individual preferences or needs. In most cases, these programs replicate traditional therapy manuals in digital form, making them less engaging for young users who are accustomed to interactive and dynamic online environments (Scholten & Granic, 2019).
+Taken together, these challenges suggest that to maximize their potential, future digital mental wellness interventions must go beyond basic functionality. By enhancing user engagement, ensuring cultural relevance, and integrating adaptive, personalized features, developers can create tools that are not only more effective but also more meaningful and sustainable for diverse student populations.
+
+2.8 Overview of the Design Thinking Approach
+Design Thinking is a problem-solving approach centered on understanding the needs and experiences of users. It integrates empathy, creativity, and analytical thinking to develop innovative solutions that genuinely meet user expectations. Many modern organizations adopt Design Thinking to strengthen customer engagement, enhance user experiences, and improve product effectiveness.
+It follows a flexible, iterative, and non-linear process that helps teams explore complex or poorly defined problems. The process involves five key stages — Empathize, Define, Ideate, Prototype, and Test — which guide designers in understanding users, redefining challenges, generating ideas, and developing and refining effective solutions. 
+
+
+2.8.1 Stages of Design Thinking
+The Design Thinking process consists of five iterative stages that guide teams toward user-centered innovation. The first stage, Empathize, focuses on understanding users’ experiences and challenges through research, observation, and engagement. This helps designers gain authentic insights into users’ needs rather than relying on assumptions. The second stage, Define, involves analyzing and synthesizing the gathered information to identify core challenges and frame them as clear, human-centered problem statements. In the Ideate stage, teams generate a wide range of creative solutions, thinking beyond conventional approaches to challenge existing assumptions and develop innovative ideas. The fourth stage, Prototype, emphasizes experimentation, where designers create low-cost, simplified models or mockups to visualize and explore possible solutions. Finally, the Test stage involves evaluating these prototypes with real users to collect feedback, refine the solutions, and determine whether they effectively address user needs. Importantly, these stages are not strictly linear; they are iterative modes that may overlap or repeat, allowing teams to continuously improve their understanding and design outcomes.
+
+2.8.2 Importance of Design Thinking in App Design
+Design thinking is an essential approach that fosters creativity, innovation, and problem-solving. It engages individuals in an iterative process of experimentation, prototyping, and feedback gathering, which helps refine ideas and develop effective solutions. By combining analytical and creative thinking, design thinking bridges the gap between theory and practice, allowing learners and designers to apply conceptual knowledge in real-world contexts. Furthermore, it emphasizes user-centered understanding, enabling individuals to design solutions that truly address user needs. Overall, design thinking promotes continuous learning, adaptability, and the development of critical problem-solving skills that are vital in the 21st century (Razzouk & Shute, 2012).
+In the context of app design, Design Thinking is particularly relevant because it places users at the center of the development process. By emphasizing empathy and understanding users’ pain points, designers can create applications that are more intuitive, accessible, and aligned with users’ real-life experiences. This human-centered focus ensures that the final product not only functions effectively but also provides a meaningful and satisfying user experience.
+Moreover, the iterative nature of Design Thinking encourages continuous testing and refinement. Through prototyping and user feedback, developers can identify flaws early, reduce costly errors, and enhance the app’s usability and performance. This process supports creativity, innovation, and flexibility, allowing design teams to build solutions that genuinely solve users’ problems and adapt to their evolving needs.
+In summary, Design Thinking serves as a powerful framework for developing digital products that are both functional and user-centered. Its emphasis on empathy, iteration, and problem-solving enables designers to move beyond technical efficiency toward creating experiences that truly resonate with users. By integrating Design Thinking into app development, teams can ensure that their solutions are not only innovative but also meaningful, sustainable, and impactful in addressing real-world challenges.
+
+2.9 Application of Design Thinking in Mental Wellness App Development
+Design Thinking offers a structured, user-centered approach to developing mental wellness applications that effectively address users’ emotional and psychological needs. By emphasizing empathy, creativity, and iterative testing, this process ensures that digital mental health interventions are not only functional but also engaging, accessible, and relevant to users’ real-life experiences. The five stages of Design Thinking—Empathize, Define, Ideate, Prototype, and Test,  can be strategically applied to create mental wellness apps that prioritize user satisfaction and therapeutic impact.
+In the Empathize stage, developers and researchers seek to understand users’ emotional challenges, behaviors, and coping mechanisms through interviews, surveys, and observations. This helps uncover underlying issues such as stress, anxiety, or social isolation that students may experience. The Define stage involves synthesizing these insights into clear problem statements, such as identifying the need for more accessible, stigma-free mental health support for university students. During the Ideate stage, teams brainstorm innovative ideas, including features like chatbots for emotional support, mood trackers, or mindfulness reminders, to address the identified needs. The Prototype stage translates these ideas into low-cost app mockups or interactive models that visualize the proposed solutions and allow for early feedback. Finally, in the Test stage, these prototypes are evaluated with real users to determine usability, effectiveness, and engagement levels. The insights gained often lead to refinements or a return to earlier stages, ensuring the final app aligns closely with user expectations and therapeutic goals.
+This iterative application of Design Thinking promotes continuous improvement and ensures that mental wellness apps are designed around user’s lived experiences rather than theoretical assumptions. As a result, the approach enhances engagement, reduces barriers to help-seeking, and supports the creation of evidence-based digital tools that can improve mental well-being among students and other populations.
+
+2.10 Review of Existing Studies 
+Design Thinking has proven valuable in developing digital mental health interventions that are user-centered, engaging, and effective. Scholten and Granic (2019) applied Design Thinking principles to create digital tools for youth mental health, emphasizing empathy, multidisciplinary ideation, and experimentation. They co-designed interactive games such as MindLight an anxiety-prevention game, and a smoking cessation game with young users to ensure relevance and engagement. Through empathy-driven participatory design, they involved youth directly in the development process, addressing the motivational and emotional needs often overlooked in traditional interventions. Iterative prototyping and testing led to significant reductions in children’s anxiety symptoms across multiple randomized controlled trials, demonstrating the potential of Design Thinking to produce both effective and enjoyable mental wellness tools.
+Similarly, Sam, Richardson, and Currie (2022) combined Design Thinking with Indigenous storytelling through a Two-Eyed Seeing approach to co-create an e-Mental health screening app for Indigenous youth. Participants engaged in Design Circles to build persona stories, map experiences, and provide usability feedback. This iterative and collaborative process incorporated cultural knowledge, holistic wellness concepts, and user preferences, ensuring that the final tools were culturally safe, relevant, and responsive to the needs of Indigenous youth.
+Expanding on these applications, Bernaerts et al. (2025) used the Design Thinking approach in the SUPER project to adapt two digital mental health apps SAM and SAFE for use in multiple countries. The process followed the five iterative stages of Design Thinking: empathize (gathering insights from users, clinicians, and stakeholders through interviews and focus groups); define (identifying user needs, challenges, and goals using personas and journey maps); ideate (generating creative solutions to address the defined challenges); prototype (developing translated and interactive versions of the apps); and test (collecting user and clinician feedback for refinement). This comprehensive and participatory process emphasized cultural adaptation, stakeholder involvement, and iterative development, ensuring that the apps were contextually relevant and user-centered.
+Overall, these studies highlight the versatility and effectiveness of Design Thinking in digital mental health innovation. By combining empathy, cultural inclusivity, and iterative design, this approach fosters the creation of mental health tools that are not only evidence-based but also engaging, culturally sensitive, and tailored to users’ real-world needs.
+
+2.11 Gaps in the Literature
+Although existing studies demonstrate that Design Thinking can support the creation of engaging digital mental health tools, certain gaps remain. Scholten and Granic (2019) focused primarily on youth but did not involve students as active co-designers, and their findings may not be applicable across different cultural or regional contexts. Similarly, the study by Sam et al. (2022), which integrated Design Thinking with Indigenous storytelling to ensure cultural relevance, was limited to Indigenous youth and did not examine the long-term use or effectiveness of the intervention. In the SUPER project, Bernaerts et al. (2025) adapted the SAM and SAFE apps for use in multiple countries, yet the research mainly involved adult stakeholders, with minimal participation from student users. Furthermore, the long-term impact and real-world adoption of these apps were not evaluated. Taken together, these gaps highlight the need for studies that apply Design Thinking in African contexts, actively involve students as co-creators, and assess the sustained effectiveness and continued use of digital mental health apps.
+2.12 Summary and Research Focus
+The review of related literature has shown that mental health challenges are becoming increasingly common among university students, especially in Nigeria, where academic pressure, financial stress, and limited access to mental health care affect students’ overall well-being. Digital mental wellness interventions have emerged as a promising way to bridge the treatment gap by providing accessible, affordable, and flexible mental health support through technology.
+Studies also revealed that applying the Design Thinking approach to mental health app development promotes empathy, creativity, and user-centered innovation. It allows designers to create tools that align more closely with users’ real needs and cultural contexts. However, gaps remain in existing research, particularly in studies conducted outside African settings, where students are rarely involved as active co-designers and the long-term use or effectiveness of the interventions is not adequately measured.
+This study seeks to address these gaps by applying the Design Thinking approach to the development of a digital mental wellness app tailored for university students in Nigeria. By engaging students directly in the design process, the study aims to create an app that is both user-centered and culturally relevant, contributing to improved mental well-being and expanding the understanding of Design Thinking in digital health innovation.
+
+2.12 Conclusion
+This literature review has explored the growing concern of mental health challenges among university students, the use of digital interventions to support mental well-being, and how the Design Thinking approach can help in developing effective mental wellness applications. The review shows that university students, especially in Nigeria, face many pressures such as academic workload, financial struggles, poor infrastructure, and social stress. These issues often lead to anxiety, depression, and emotional distress, which negatively affect their academic performance and overall quality of life.
+Digital mental wellness tools, such as mobile apps and online therapy platforms, have emerged as a way to make mental health support more accessible and convenient. These tools provide privacy, flexibility, and affordability, especially for students who may not have access to traditional counseling services. However, despite their benefits, many of these digital solutions still face challenges like low user engagement, lack of cultural relevance, and limited long-term impact.
+The Design Thinking approach provides a practical way to address these challenges. By focusing on empathy, creativity, and user feedback, it helps developers create mental wellness apps that are centered around the real needs and experiences of students. The five stages empathize, define, ideate, prototype, and test, encourage continuous improvement and ensure that the final product is user-friendly, meaningful, and effective. Studies reviewed, including those by Scholten and Granic (2019), Sam et al. (2022), and Bernaerts et al. (2025), show that Design Thinking can make digital mental health tools more engaging and relevant. Still, most of these studies were done in Western or specific cultural settings, leaving a gap in African contexts like Nigeria where cultural, social, and technological factors differ.
+In summary, this review highlights that combining Design Thinking with digital innovation can lead to more engaging, accessible, and effective mental wellness apps for university students. More research is needed in Nigeria and similar settings to develop solutions that truly reflect students’ realities and ensure long-term use. Doing so will help promote better mental health, improve academic performance, and create supportive digital spaces for university students
+
+
+CHAPTER THREE
+METHODOLOGY
+3.1 Introduction
+The chapter outlines the approach that was used to develop and the processes adopted in the design and implementation of Wellnest app, a mental wellness application. It describes the research design and justifies the Design Thinking philosophy applied to learn more about the mental wellness needs of users and informs the conceptualization of the application. The development model of the system, target population, methods of data collection, tools and technologies used, and procedures involved in the design and implementation of the application are also discussed in the chapter. Moreover, ethical issues connected with the research are described in order to make sure that the information of the participants is taken care of.
+3.1.1 Methodology
+The study adopted the Design Thinking methodology, which is an iterative, creative, and human-centered approach to problem solving. This methodology emphasizes a deep understanding of users’ needs and experiences and prioritizes these needs throughout the solution development process. By placing users’ requirements at the center of the design process, Design Thinking supports the development of solutions that are relevant, usable, and desirable to the intended users. This approach is therefore appropriate for addressing mental wellness challenges, as it ensures that the developed application aligns with the needs of individuals affected by the problem and encourages sustained user engagement.
+Using the Design Thinking approach, the study was carried out in a structured process including the empathize, define, ideate, prototype, and test steps. The following stages were used to lead the systematic search of mental wellness issues of users, identifying defining areas of problems, and producing the right solution ideas. This process was iterative and thus the proposed solution was refined as per the user feedback at any given stage hence making the application more relevant and easier to use. This was a structured but flexible process that made sure that the decisions taken during the design of the study were not based on assumptions but on the basis of real user needs.
+Although the Design Thinking approach was employed to shape user needs perception and guide solution conceptualization, the implementation of the application required a flexible and adaptive system development model. Consequently, the system development phase of the study adopted the Agile model. The Agile model emphasizes an iterative and incremental process of software development in which system requirements, design, implementation, testing, and deployment are continuously refined through short development cycles. This approach allows for regular feedback, continuous improvement, and rapid response to changing user requirements. The integration of Design Thinking with the Agile model enabled the study to effectively combine user-centered innovation with a technically robust and adaptable implementation process.
+3.2 Analysis of Existing Systems
+Despite the progress made by existing mental wellness applications, several weaknesses remain, particularly when considered in the context of Nigerian university students. First, most existing solutions are designed for youth or adult populations in general rather than specifically targeting university students, whose mental health challenges may be unique due to academic pressures and transitional life stages. Second, very few applications actively engage this cohort as co-designers, resulting in solutions that may not fully reflect the real needs, preferences, and experiences of students.
+Additionally, there is a notable lack of research and adaptation of these apps to African contexts, including Nigeria, which raises concerns regarding cultural relevance and usability. Many of these interventions have not been evaluated for long-term engagement, sustained adoption, or overall effectiveness, leaving uncertainty about their ability to provide enduring mental wellness support. Consequently, existing applications may be irrelevant, poorly adopted, or culturally misaligned for Nigerian university students, limiting their practical impact on mental health outcomes, academic performance, and general well-being.
+This gap highlights the need for a user-centered approach, such as Design Thinking, that actively involves students in the design process to create a culturally appropriate, engaging, and effective mental wellness application tailored to their specific needs.
+3.2.1 Drawbacks of the Existing System
+University Students not targeted specifically: The available mental wellness apps are typically targeted at wide audiences of young people or adults and are not tailored to the specific mental health issues of the target population of university students. 
+Absence of Student participation in Design: There are minimal applications where the university students are actively involved as co-designers by which students may not be well represented in the development of the systems as per their needs, preferences, and experiences.
+Inadequate Adaptation to the Nigerian Environment: Not much is available in research and localization of available applications in African and Nigerian contexts, which poses a question of cultural relevance and usability. 
+Lack of Long-Term Evaluation: There is a lot of evidence suggesting that most of the current interventions are not evaluated regarding long-term involvement, lifetime use, or overall efficacy.
+Low Practical Impact: The current applications might be ill-adapted or ineffective due to low levels of user engagement and low cultural fit, thus, restricting their effectiveness and influence on mental health outcomes of students, their academic outcomes, and well-being.
+3.3 Analysis of the Proposed System (Wellnest App)
+The proposed mental wellness application (WellNest) is a user-oriented and culturally sensitive solution for Nigerian university students. The approach to Design Thinking, in turn, will enable the system to address the needs of students and thoroughly engage them in the design process, making the system more usable and acceptable. The application combines various mental wellness support functionalities in one platform making it a holistic view of student well-being. Moreover, the system enables continuous enhancement with the feedback of users, which will guarantee the relevance, engagement, and efficiency in the long term.
+3.3.1 Advantages of the Proposed System 
+The proposed system offers several advantages over existing solutions, particularly for Nigerian university students
+User-Centered Design: Developed using Design Thinking, ensuring the app meets the real needs and preferences of students.
+Culturally Relevant: Tailored to the social, academic, and emotional context of Nigerian university students.
+Active Participation / Co-Design: Students contribute feedback and evaluate prototypes, promoting ownership and usability.
+Holistic Mental Wellness Support: Integrates features for stress management, mood tracking, motivation, and academic support in a single platform.
+Iterative Improvement: Allows for continuous refinement based on user feedback, ensuring sustained engagement and effectiveness.
+
+3.4 Design Thinking Framework
+The Design Thinking framework was employed in this study to guide the systematic development of the mental wellness application. This framework consists of five interrelated stages: empathize, define, ideate, prototype, and test. Each stage was applied to ensure that the application was developed based on a clear understanding of users’ mental wellness needs and refined through continuous user involvement. The stages are described as follows.
+Empathize Stage: The empathize stage focused on understanding the mental wellness challenges experienced by undergraduate students. At this stage, the study sought to gain insight into students’ emotional states, stressors, academic pressures, and coping mechanisms. Data were collected through user-centered methods such as questionnaires and informal discussions, which allowed participants to express their experiences and concerns related to mental health. This stage enabled the researcher to develop empathy for the users and to understand the problem from the users’ perspectives rather than making assumptions.
+Define Stage: In the define stage, the information gathered during the empathize phase was analyzed and synthesized to clearly identify the core mental wellness problems faced by students. Common themes and patterns were identified from user responses, leading to the formulation of a clear problem statement that guided the design process. This stage helped to narrow the focus of the study by transforming broad mental health concerns into specific, actionable problems that the application aimed to address.
+Ideate Stage: The ideate stage involved generating possible solutions and features that could address the identified mental wellness challenges. Brainstorming techniques were used to explore a wide range of ideas without immediate evaluation or limitation. At this stage, potential application features such as stress management tools, mood tracking, motivational content, and mental wellness resources were considered. The goal of this stage was to explore creative and user-focused solutions that aligned with the defined problem statement.
+Prototype Stage: During the prototype stage, selected ideas from the ideation phase were transformed into a visual and interactive representation of the application. Low-fidelity and high-fidelity prototypes were developed to illustrate the structure, layout, and key functionalities of the mental wellness app. Design tools were used to create interface mock-ups that reflected the proposed features and user flow. This stage allowed the researcher to translate abstract ideas into tangible designs that could be evaluated by users.
+Test Stage: The test stage involved evaluating the developed prototype with potential users to assess its usability, clarity, and relevance to their mental wellness needs. Users were asked to interact with the prototype and provide feedback on the design, navigation, and overall user experience. The feedback collected at this stage was used to identify areas for improvement and to refine the application design. This stage ensured that the final design decisions were informed by user input and aligned with the objectives of the study.
+3.5 System Development Model (Agile Model)
+After applying the Design Thinking approach to understand the problem and plan the solution, the Agile model will be adopted for the development of the mental wellness application. The Agile model enables development in small, iterative cycles, allowing continuous improvements and adjustments based on feedback. This approach is suitable for the project because the application focuses on user needs, which may evolve as development progresses.
+The development process will be organized into the following phases: planning, requirements analysis, designing, implementation, testing, and deployment. These phases will be repeated when necessary to enhance and refine the application.
+Planning: In this phase, the overall project will be outlined by defining the main goals of the application and identifying the features to be developed. The order of feature development will be determined, and timelines will be established for each stage of the process.
+Requirements Analysis: This phase involves identifying and analyzing the functional and non-functional requirements of the application. The requirements will be derived from user needs discovered during the Design Thinking process. These include aspects such as user interaction, ease of use, and performance expectations. The requirements will be reviewed and updated when necessary to ensure alignment with project objectives.
+Designing: During the design phase, the layout and structure of the application will be created. Figma will be used to design the user interface, including screens, navigation flow, and visual elements. These designs will provide a clear representation of how users will interact with the application before the coding phase begins.
+Implementation: In this phase, the application will be developed by translating the approved designs into functional code. Features will be implemented incrementally to ensure that each component aligns with the planned design and satisfies the identified requirements.
+Testing: The application will be tested regularly to ensure proper functionality and usability. This includes verifying that features operate correctly, identifying and correcting errors, and ensuring that the system is user-friendly. Continuous testing will support early detection and resolution of issues during development.
+Deployment: Finally, the application will be prepared for release and made accessible to users. This may involve hosting the application online using platforms such as GitHub or other deployment tools. Feedback gathered after deployment will inform further refinements and future iterations of the system.
+
+
+3.5.1 Benefits of the Agile Model
+The benefits of using the Agile model in the development of the Wellnest app include:
+Supports continuous user involvement, allowing feedback from users to be incorporated regularly, which aligns well with insights generated from the Design Thinking process.
+Promotes iterative and incremental development, enabling the application to be built in small, manageable components that are reviewed and improved over multiple development cycles.
+Flexibility of the Agile model allows for easy accommodation of changing requirements, ensuring that evolving user needs and improvements can be addressed throughout the development process.
+Encourages frequent testing and evaluation at the end of each iteration, which helps in early detection and correction of errors, thereby improving overall application quality.
+
+3.5.2 Justification for Using the Agile Model
+The Agile model was chosen for developing the Wellnest app because it is flexible, iterative, and user-focused. After using Design Thinking to identify initial user requirements, Agile allows these requirements to be refined as development continues. Agile emphasizes building the app in small steps, testing often, and collaborating closely, which helps ensure the app meets user needs and maintains quality. Its short development cycles also make it suitable for an academic project, improving the app’s usability, clarity, and overall effectiveness.
+
+Figure 3.1 Agile Development Methodology
+3.6 Requirement Specification
+This section outlines what the Wellnest app is expected to do and the conditions it should meet to work properly. It includes the specific features the system must provide (functional requirements), how well the system should perform (non-functional requirements), and the technical needs for running the app on mobile devices. Clearly defining these requirements helps guide the design, development, and testing of the application.
+3.6.1 Mobile Requirements
+Below are some of the basic requirements that the user’s mobile device has to have to be able to use the Wellnest mental application and allow it run smoothly on the users’ device. Some of the hardware capabilities that the system will provide to meet the users’ needs are;
+The Wellnest app shall be compatible with and function on both android based smartphones and Apple iPhone’s that have a minimum OS version of Android 9.0 and iOS 13.0 respectively.
+The Wellnest app shall support smartphones and be responsive on both Android and iOS devices with varying screen sizes.
+The Wellnest app shall require a stable internet connection (3G, 4G, 5G, or Wi-Fi) for browsing, orders, chatting, and delivery tracking.
+The app shall not exceed 100MB in installation size to support users with limited storage.
+The app shall run efficiently on devices with at least 2GB RAM on Android and 2GB or above on iOS devices.
+3.6.2 Functional Requirement Specification
+The functional requirements specification defines the specific behaviours, functions and tasks the Wellnest app must perform for users (students, psychologists/counsellors, and admin). Some of the functional requirements include:
+Enables users to create and sign in with email or Google authentication, reset passwords, and optionally use the app anonymously for privacy.
+Allows users to record and log their moods daily or periodically using preset scales, icons, or brief text, and label entries with related activities or events such as exams, academic workload, or social situations.
+Delivers visual displays in charts and timelines to show mood trends and emotional patterns over time.
+Offers an AI-based recommendation engine that provides personalized wellness actions based on mood history, interaction patterns, time of day, stress levels, and user preferences.
+Provides an AI wellness assistant that responds to user questions, delivers coping strategies, and offers guided relaxation or mindfulness exercises, while escalating to professional or campus counseling services if repeated distress is detected.
+Brings a personalized dashboard showing daily mood summaries, inspirational messages, recent activities, and weekly wellness reports highlighting progress and potential concerns.
+Enables users to book, manage, and receive reminders for appointments with psychologists or campus counselors, integrated with a calendar system.
+Provides access to curated mental health resources, including articles on relevant wellness topics, with search and filter options by keyword or category.
+Includes self-assessment and screening tools for stress, anxiety, or depression, with periodic reminders to retake assessments and compare results over time.
+Sends smart notifications and reminders to encourage mood logging, activity completion, and attendance at scheduled sessions.
+Allows offline access to selected resources and automatically syncs any offline activity once internet connectivity is restored.
+Generates progress reports summarizing mood patterns, engagement, and overall wellness improvements..
+Table 1 Roles of User
+
+3.6.3 Non-Functional Requirement Specification
+Non-functional requirements establish quality attributes and functional restriction of the suggested mental wellness application. Contrary to functional requirements that stipulate what the system is supposed to do, non-functional requirements explain how well the system is supposed to work in terms of efficiency, security, usability, reliability and scalability. The demands are necessary to make sure that the application provides a reliable, safe, and convenient experience to the Nigerian university students.
+Performance Requirements: The system will offer reasonable response times to guarantee smooth interaction to the users. The most important application features including user authentication, mood logging, content accessing, dashboard loading must be able to run in a substantial, but not very long period under an average network environment. The system will be able to effectively accommodate concurrent users without any serious performance setbacks particularly during the high usage times like during examination weeks.
+Security Requirements and Privacy Requirements: The application will provide privacy of user data, data integrity, and user data security. There will be secure authentication measures to ensure that no person will gain unauthorized access. All user data, such as mood records, assessment outcomes and counseling documentation will be stored and will not be exposed. This system will be able to fulfill the ethical standards by enabling the users to manage their data, such as giving their consent on exporting the report and sharing it. The anonymity features will be allowed to promote privacy and stimulate user engagement.
+Usability Requirements: The system should be user friendly and not complicated especially to the students of the university who have different levels of technical skills. The interface will be user-friendly and visually appealing and uniform across screens. Navigation will also be easy, and there will be distinctively marked icons and few steps needed to accomplish the major activities like mood logging or using resources. The application must also give the user feedback on what he/she is doing and be easily understandable being user-friendly.
+Reliability Requirements: The system will be stable and precise with minimal failure. The data of the users will be stored in the proper manner and the system will avoid losing data in case of any unforeseen interruptions like network and/or crash of the application. There shall be offline functionality of the selected features and when the internet is restored, automatic synchronization will be done. The uptime of the systems will be as high as possible in order to have uninterrupted access to mental wellness support.
+Scalability Requirements: The application will be in a position to support more users as the number of people using it increase without affecting the performance or stability. The architecture of the system will facilitate the system growth, such as new features, a higher volume of data, and connection with new counseling services. The architecture will enable the system to expand with the increased adoption of the system in different universities.
+
+3.7 System Design
+This section describes the design of the proposed mental wellness application. The system design translates the validated user requirements obtained through the Design Thinking process into a structured technical solution. It outlines the overall architecture, system models, and database design that guide the implementation of the application.
+
+
+3.7.1 Architectural Design
+The architectural design of the proposed mental wellness application outlines the interactions among the key components of the major system, such as the users (students of the university), psychologists, administrators, the application interface, and the central database to provide effective and user-oriented mental health support. The architecture will be such that it makes sure that there is secure data handling, efficient delivery of services and easy user interaction.
+The system takes the form of a client-server design with users being able to use the application on a mobile based interface. The system enables students to log in or register, enter mood, access wellness, complete self-assessments, and get personalized recommendations. Psychologists enter the system by a specific interface which enables them to control counseling sessions, check the reports of users (with permission), and give expert advice. Administrators have access to an administrative dashboard that they can use to manage user accounts, maintain content updates, and system usage analytics.
+All application logic, such as user authentication, role-based access control, mood data processing, AI-driven recommendations, appointment booking, and notification services, is managed by the backend server. It functions as a mediator between the user interfaces and the database, which makes the requests to be handled in a secure and efficient manner.
+All the appropriate data, such as user profiles, mood logs, assessment, wellness resources, appointment schedules, and system analytics, are stored in the central database. The privacy of users is maintained and confidentiality is assured by storing sensitive user information safely. It is also compatible with the database, which allows the synchronization of the offline data as soon as the internet connection restores to allow the system to be used consistently.
+This architecture design encourages a distinction of roles between the user interface, application logic, and data storage. It ensures scalability, reliability, and secure communication among the components of the system, and it can be used in various universities.
+
+3.7.2 System Modelling
+System modelling is used to visually represent the interactions between users and the system, as well as the flow of activities within the application. It aids in understanding system behavior and serves as a blueprint for development. The following diagrams will be used to model the proposed system:
+Use case diagram
+Flowchart
+
+3.7.2.1 Use Case Diagram
+The use case diagram illustrates the interactions between the system and its users, namely students, psychologists, and administrators. Students can register, log moods, access wellness resources, book counseling sessions, and view reports. Psychologists manage appointments, review user progress, and provide recommendations. Administrators oversee user management, content updates, and system analytics. The use case diagram highlights the roles and responsibilities of each actor within the system.
+
+
+Figure 3.2 Usecase Diagram
+
+3.7.2.2 Flowchart
+The flowchart represents the logical flow of activities within the application. It outlines processes such as user authentication, mood logging, recommendation generation, and appointment booking. The flowchart demonstrates decision points and system responses, providing a clear understanding of how user inputs are processed to produce appropriate outputs. Below is the Flowchart for the proposed system:
+
+
+Figure 3.3 Flowchart Diagram
+
+
+3.7.3 Database Design
+This system will use MongoDB, which is a NoSQL database, and which will offer flexibility, scalability, and efficient data management. All the related information about the users, psychologists, administrators, mood logs, assessments, appointments, resources, and reports will be stored and managed in the database to facilitate the flow of the frontend and backend parts. The database table has the following collections (entities):
+Collection of users: It contains user profiles containing first name, last name, email, phone number, password (encrypted), and role (user, psychologist, admin). This enables authentication, role access and user tracking.
+Mood Logs Collection: The mood logs are information logged by users which includes timestamps and related moods and activities or events (e.g. exams, academic workload, social interactions). This favors trend analysis and customized suggestions.
+Assessments Collection: Self-assessment and screening outcomes of stress, anxiety, or depression. To monitor mental wellness over time, is inclusive of user ID, assessment type, scores, and timestamps.
+Appointments Collection: Books and schedules counseling with psychologists or campus counselors. The fields are user ID, psychologist ID, date, time, status and reminders of the upcoming sessions.
+Resources Collection: This is a curated collection of mental health content available in the forms of articles, videos, podcasts, and guided exercises. Allows search, classification and access control by the various user categories.
+Reports Collection: The process creates and stores the progress reports which contain information about the mood trends, the results of the assessment, performance, and general wellness gains. Fields encompass report ID, user ID, generated date, as well as report type.
+This design has allowed entities to be placed with the right relationships to facilitate an effective retrieval of data, flow of data in the system, and a personalized experience of mental wellness among users. The figure below shows the graphical overview of the database design of the proposed system
+
+
+Figure 3.1 Database Design
+3.8 Programming Languages and Development Tools
+The design and development of the Wellnest mental wellness mobile application will also be implemented through the integration of both modern tools and technologies to provide an intuitive interface, functional reliability, and an engaging user experience. Every tool has been chosen thoughtfully so as to assist in different areas of the application, user-centered design and frontend development, as well as, the backend functioning, database maintenance, and secure user data manipulation.
+3.8.1 Design of the System
+Figma: Figma will be used to design the user interface (UI) and user experience (UX) of the app. It is a collaborative web-based tool that allows for the creation of wireframes, prototypes, and detailed visual mockups. This tool will enable the developer to visualize and test the layout and user flow before proceeding to development, ensuring intuitive navigation and consistency across screens.
+3.8.2 Frontend Development
+The Wellnest mental wellness mobile application will be developed as a cross-platform mobile application using react native. The frontend is responsible for delivering an engaging user interface, facilitating smooth user interaction, and enabling intuitive navigation throughout the app. Design efforts will focus on usability, accessibility, and consistency to ensure that users can easily record moods, view patterns, and interact with app features across different devices.
+React Native: React Native will be used to build the frontend, allowing the development of cross-platform mobile apps with a single JavaScript codebase. It is based on ReactJS, an open-source framework, ensuring efficient development and maintainability.
+Expo Router: Expo Router is a file-based router for React Native and web applications, enabling seamless navigation between screens. It allows components to be reused across platforms, enhancing the consistency and usability of the app interface.
+These technologies will enhance development speed and ensure a smooth, responsive interface across Android and iOS platforms.
+3.8.3 Back-end Development
+The backend of the Wellnest mental wellness mobile application is responsible for handling authentication, processing mood entries, generating AI-based recommendations, and managing application data. It ensures secure data handling through proper data protection measures and role-based access, safeguarding user information while supporting efficient operations.
+Node.js: Node.js is an open-source, cross-platform JavaScript runtime environment that executes JavaScript code outside a web browser. It enables developers to build server-side applications efficiently using JavaScript.
+Express.js: Express.js is a minimal and flexible Node.js web application framework that simplifies routing, middleware integration, and server configuration. It facilitates smooth data transactions and server-side operations for both web and mobile applications.
+3.8.4 Development Tools
+The development of the Wellnest mental wellness mobile application involved the use of several tools that facilitated efficient coding, testing, debugging, and design. These tools supported both the frontend and backend development processes, as well as the overall project workflow. The tools used are outlined below:
+Visual Studio Code (VS Code):
+Visual Studio Code was the primary integrated development environment (IDE) used for writing and managing the project’s source code. Its lightweight structure, rich extension support, and integrated terminal made it suitable for both frontend (React Native) and backend (Node.js/Express.js) development. Features such as IntelliSense, Git integration, and debugging tools improved productivity and code quality.
+Figma:
+Figma was used as the main design tool for creating the app’s user interface, wireframes, and prototypes. It enabled collaborative design, allowing designers and developers to maintain consistency in UI components and user interaction patterns across different screens.
+Git & GitHub:
+Git and GitHub were used for version control, enabling the team to track changes, manage multiple branches, and collaborate efficiently. These tools ensured that updates to the codebase were synchronized and conflicts were minimized during development.
+Postman:
+Postman was utilized for testing RESTful API endpoints developed in Express.js. It allowed simulation of HTTP requests such as GET, POST, PUT, and DELETE to verify that the backend responded correctly with the intended logic and data. Postman also supported testing authentication and validating error handling.
+MongoDB Compass:
+MongoDB Compass provided a graphical user interface (GUI) for managing the MongoDB database. It allowed easy visualization, querying, and monitoring of collections such as user profiles, mood entries, and activity logs. This tool was essential for verifying data consistency and debugging database-related issues.
+These development tools collectively enhanced the efficiency of the project by simplifying code development, design, debugging, API testing, and database management, ensuring that the Wellnest mobile application was built and validated in a streamlined and professional environment.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CHAPTER FOUR
+SYSTEM IMPLEMENTATION, TESTING AND EVALUATION
+4.1 Overview
+This chapter presents the implementation and testing of the WellNest Mental Wellness mobile Application. It provides a comprehensive description of how the system was developed and deployed based on the design specifications and methodology discussed in the previous chapters. The implementation phase involved transforming the proposed design into a functional mobile application aimed at promoting mental wellness and providing users with accessible mental health support resources.
+The chapter discusses the development tools, technologies, and techniques employed in building the application, as well as the integration of its core features and functionalities. These features were designed to enhance user engagement, facilitate communication between users and mental health professionals, and provide a secure and user-friendly platform for mental wellness management.
+Furthermore, this chapter presents the testing procedures carried out to evaluate the functionality, usability, performance, and reliability of the application. The results obtained from these tests demonstrate the effectiveness of the WellNest Mental Wellness Application in meeting the objectives of the project and ensuring a satisfactory user experience.
+
+4.2 Main Features of the Wellnest Mental Wellness application
+The WellNest Mental Wellness Application is designed to provide users(Students) with a safe, accessible, and user-friendly platform for managing their mental well-being. The system offers various features that enable users to access mental health resources, connect with mental health professionals, monitor their emotional well-being, and receive personalized support. The following are the key features implemented in the application:
+4.3 Student Features
+The student is the primary user of the WellNest Mental Wellness Application. Students can access a variety of mental wellness tools designed to support their emotional and psychological well-being. These features enable users to track their moods, maintain journals, engage in guided meditation sessions, interact with the AI chatbot, access educational resources, and book counseling sessions with psychologists. The student interface is designed to provide a personalized and supportive mental wellness experience.
+
+4.3.1 Onboarding Page
+The onboarding page serves as the introductory interface for first-time users of the WellNest application. It provides a brief overview of the application's purpose and key features, such as mental wellness tracking, access to professional support, self-help resources, and personalized wellness recommendations. The onboarding screens guide users through the benefits of the platform and encourage them to create an account or log in. This feature helps users understand the application's functionality and navigate its services effectively.
+
+Figure 4.1.1 Onboarding Page
+
+4.3.2 Sign Up and Login Page
+The Sign Up and Login feature enables users to create and access their accounts securely. New users can register by providing information such as their full name, email address, and password, while existing users can log in using their registered credentials. The system incorporates input validation, authentication mechanisms, and password encryption to ensure data security and protect user privacy.
+
+Figure 4.1.2 Sign Up and Login Page
+
+4.3.3 OTP Verification Page
+Following account registration, users are required to verify their identity through a One-Time Password (OTP) sent to their registered email address. This verification process enhances the security of the platform by ensuring that only legitimate users gain access to the application's features. The OTP verification feature helps prevent unauthorized access and strengthens user account protection.
+
+Figure 4.1.3 OTP Verification
+
+4.3.4 Personalization Page
+The Personalization Page is an onboarding feature designed to collect user preferences and wellness-related information in order to provide a more personalized experience within the WellNest Mental Wellness Application. During this process, users are asked a series of questions regarding their gender, age group, current mood, wellness challenges, reminder preferences, mood-tracking frequency, preferred reminder time, and primary wellness goals.
+The information gathered is used to customize content, recommendations, reminders, and wellness activities to better meet the individual needs of each user. By understanding users' preferences and mental wellness objectives, the application can deliver a more relevant and engaging experience that supports their overall well-being journey.
+
+
+Figure 4.1.4 Personalization Page
+
+4.3.5 User Home Page
+The User Home Page serves as the main dashboard of the WellNest Mental Wellness Application. It provides users with quick access to essential mental wellness tools and resources, including mood tracking, journaling, meditation, emotional insights, daily motivational quotes, notifications and AI chatbot. The page is designed to offer a personalized and user-friendly experience that supports users in monitoring and improving their mental well-being.
+
+
+Figure 4.1.5 Home Page
+
+4.3.6 Log Your Mood Page
+The Log Your Mood feature enables users to record and monitor their emotional state on a daily basis. Users can select or describe their current mood, allowing the application to track emotional patterns over time. This feature promotes self-awareness by helping users recognize factors that influence their mental well-being. The collected mood data is also used to generate personalized emotional insights and recommendations, supporting users in maintaining a healthier mental state.
+
+Figure 4.1.6 Log Your Mood Page
+
+4.3.7 Journal Page
+The Journal feature provides users with a private space to record their thoughts, feelings, experiences, and daily activities. It encourages self-reflection and emotional expression, which are important aspects of maintaining good mental health. Users can create, view, edit, and manage journal entries at any time, allowing them to document personal experiences and track their emotional growth over time. This feature helps users gain deeper insights into their mental well-being and supports healthy coping strategies.
+
+Figure 4.1.7 Journal Page
+
+4.3.8 Meditation Screen
+The Meditation Screen feature provides users with quick access to guided meditation and relaxation sessions aimed at improving mental well-being. It offers a variety of mindfulness exercises designed to help users manage stress, enhance focus, and promote relaxation. The meditation screen comprises of four different sessions designed to meet varying user needs and time availability. Each session is also accompanied by soothing background music that helps calm the mind, reduce stress, and create a more immersive and relaxing meditation experience. Users can select from these categories based on their personal needs and preferences.
+
+Figure 4.1.8 Meditation Screen
+
+Below are the four meditation sessions:
+Quick calm: The Quick Calm session is a short guided meditation designed to help users quickly reduce stress and regain emotional balance. It uses simple breathing and relaxation techniques to promote a sense of calm and relaxation within a few minutes.
+
+Figure 4.2.1 Quick Calm Pages
+
+Focus Meditation: The Focus Meditation session helps users improve concentration, attention, and mental clarity. Through guided mindfulness exercises, users can minimize distractions and enhance their ability to stay focused on tasks. 
+
+Figure 4.2.2 Focus Meditation Pages
+Deep Relaxation: Deep Relaxation session is designed to help users achieve a state of complete physical and mental relaxation. It guides users through calming exercises that reduce stress, release tension, and promote a sense of inner peace. This session is particularly beneficial for individuals seeking to recover from mental fatigue and improve their overall emotional well-being.
+
+Figure 4.2.3 Deep relaxation pages
+
+Sleep Relaxation: The Sleep Relaxation session is designed to help users unwind and prepare for restful sleep. It incorporates calming techniques such as deep breathing and guided relaxation to reduce tension, quiet the mind, and promote better sleep quality. Sessions are available in durations of 10–20 minutes.
+
+Figure 4.2.4 Sleep relaxation pages
+
+4.3.9 AI Chatbot
+The AI Chatbot feature provides users with instant, interactive mental wellness support through a conversational interface. It allows users to discuss their thoughts, emotions, and concerns in a safe and accessible environment. The chatbot offers helpful responses, emotional support, self-care suggestions, coping strategies, and guidance on managing stress and other everyday mental health challenges. Available at any time, it serves as a convenient companion that encourages users to maintain positive mental wellness habits and seek appropriate support when needed.
+
+Figure 4.3.1 AI Chatbot pages
+
+4.2.10 Session Page
+The Session Page enables users to schedule appointments with qualified psychologists through the WellNest Mental Wellness Application. This page displays a list of available psychologists along with their profiles, including relevant information such as their specialization, experience, and professional background. Users can review these profiles to identify the psychologist that best suits their needs.
+After selecting a psychologist, users can view the available dates and time slots provided by that psychologist. The scheduling system allows users to choose a convenient appointment time and book a counseling session directly through the application. This feature simplifies the appointment booking process and ensures that users can easily access professional mental health support at their preferred time.
+
+Figure 4.3.2 Session Page
+
+4.3.11 Resources Page
+The Resources Page provides users with access to a collection of informative articles and educational content related to mental health and wellness. The page presents articles on various topics, such as stress management, anxiety, depression, academic pressure, sleep, self-esteem, coping tools, and relationship. Users can browse available topics, select articles that match their interests or needs, and read them directly within the application. This feature helps users gain knowledge, develop healthy coping strategies, and improve their overall understanding of mental wellness.
+
+
+Figure 4.3.3 Resources Page
+
+4.3.12 Settings Page
+The Settings Page allows users to manage their account information, preferences, and application settings within the WellNest Mental Wellness Application. It serves as a centralized location where users can customize their experience and access important account-related features.
+The page includes an Edit Profile option, which enables users to update their personal information. Account Settings provides access to account management features, while Privacy & Security allows users to manage privacy preferences and security-related options. The App Settings section enables users to customize application behavior according to their preferences.
+Users can also access Sessions (Appointments) to view and manage their scheduled counseling sessions. The Notification section allows users to control alerts and reminders from the application. Help & Support provides assistance and guidance for using the application, while the About section contains information about the WellNest Mental Wellness Application. The Logout option enables users to securely sign out of their accounts.
+
+Figure 4.3.4 Setting Page
+
+4.4 Administrator Features
+The administrator is responsible for overseeing the overall operation and management of the WellNest Mental Wellness Application. Administrators can monitor platform activities, manage users and psychologists, create psychologist invitations, organize mental wellness resources, manage motivational quotes, and maintain system content. The administrator interface provides the necessary tools for ensuring the smooth operation, security, and effectiveness of the platform.
+4.4.1 Admin Home Page
+The Admin Home Page serves as the central dashboard for managing and monitoring activities within the WellNest Mental Wellness Application. It provides administrators with a summary of key platform statistics, including the total number of users, psychologists, resources, appointments, and motivational quotes available on the system. These statistics enable administrators to track platform growth and overall usage.
+The dashboard also features a Recent Activities section that displays the latest actions performed within the application, such as new user registrations, resource uploads, appointment bookings, psychologist profile updates, and mood-tracking activities. This allows administrators to monitor system operations in real time and maintain effective oversight of the platform.
+
+Figure 4.4.1 Admin Home Page
+4.4.2 Psychologist Invitation Page
+The Psychologist Invitation Page enables administrators to securely invite qualified psychologists to join the WellNest Mental Wellness Application. Administrators can create an invitation by providing the psychologist's email address and specifying the validity period of the invitation token. Once generated, the invitation token can be shared through secure communication channels to ensure account security.
+The page also provides a management interface for tracking all invitations sent to psychologists. Administrators can view the email address of invitees, monitor invitation statuses such as Active, Used, Expired, and Revoked, and perform actions such as revoking active invitations when necessary. This feature helps maintain a secure and controlled onboarding process for mental health professionals joining the platform.
+
+Figure 4.4.2 Invite Page
+
+4.4.3 Editor Page
+The Editor Page provides administrators with tools for managing content and users within the WellNest Mental Wellness Application. It serves as a centralized workspace for organizing mental wellness resources, motivational quotes, and user information across the platform.
+The page includes a Resources Editor, which allows administrators to create, edit, and organize educational content on various mental wellness topics such as anxiety, stress management, academic pressure, sleep, and self-esteem. It also features a Motivational Quote Editor that enables administrators to add, update, and manage daily motivational quotes displayed to users.
+In addition, the page contains a user management section that displays information about registered users, psychologists, and administrators, including their names, email addresses, roles, account status, last activity, and date joined. This enables administrators to monitor user accounts and manage platform access effectively.
+
+Figure 4.4.3 Editor Page
+4.4.4 Admin Settings Page
+The Admin Settings Page enables administrators to manage their profile, account, and system preferences within the WellNest Mental Wellness Application. It provides access to personal information, account settings, privacy and security options, application settings, and notification preferences. The page also includes help and support resources, information about the application, and a secure logout option. This feature allows administrators to maintain their accounts while ensuring the efficient and secure management of the platform.
+
+Figure 4.4.4 Admin Setting Page
+
+4.5 Psychologist Features
+Psychologists are mental health professionals who provide support and counseling services through the WellNest Mental Wellness Application. They can manage their professional profiles, set their availability schedules, view appointment requests, and conduct counseling sessions with students. The psychologist interface is designed to facilitate efficient communication and appointment management while ensuring quality mental health support for users.
+
+4.5.1 Psychologist Sign-Up and Login Page
+The Psychologist Sign-Up and Login Page allows authorized psychologists to create and access their accounts on the WellNest Mental Wellness Application. During registration, psychologists are required to provide a valid registration secret (invitation code) issued by the administrator. For security purposes, the email address used during registration must be the same email address to which the invitation was sent. Registration will only be successful if both the invitation code and email address match the records created by the administrator. This process ensures that only verified psychologists can access the platform.
+
+Figure 4.5.1 Psychologist Sign-Up and Login Page
+
+4.5.2 Psychologist Personalization Page
+The Psychologist Personalization Page is an onboarding feature that collects professional information required to create a psychologist's profile on the WellNest Mental Wellness Application. During this process, psychologists provide details such as their professional title, area of specialization, years of experience, and preferred location for in-person sessions. The information collected is used to build a comprehensive profile, facilitate appointment scheduling, and help students identify and connect with psychologists whose expertise best matches their mental wellness needs.
+
+
+Figure 4.5.2 Psychologist Personalization Page
+4.5.3 Psychologist Home Page
+The Psychologist Home Page serves as the main dashboard for psychologists using the WellNest Mental Wellness Application. It provides a personalized overview of their daily activities, including a greeting message, professional details, and session updates. The page displays key statistics such as total appointments, pending sessions, cancelled sessions, and today’s scheduled appointments.
+It also includes a calendar view and a detailed list of scheduled sessions, showing information such as session time, client name, concern type, and appointment status (ongoing, pending, confirmed, cancelled, or completed). This enables psychologists to efficiently manage their workload, track session progress, and stay organized with their daily counseling activities.
+
+Figure 4.5.3 Psychologist Home Page
+4.5.4 Psychologist Availability Page
+The Psychologist Availability Page allows psychologists to manage their schedules and specify the time slots during which they are available for counseling sessions. Through a calendar interface, psychologists can add, update, or remove available time slots and mark periods as available or unavailable. This information is used by students when booking appointments, ensuring that sessions can only be scheduled during the psychologist's designated availability periods.
+
+
+Figure 4.5.4 Psychologist Availability Page
+
+4.5.5 Psychologist Settings Page
+The Psychologist Settings Page enables psychologists to manage their profile information, account preferences, and application settings. The page provides access to personal information, professional details, and practice location settings, allowing psychologists to keep their profiles accurate and up to date. It also includes account settings, privacy and security options, notification preferences, help and support resources, and an about section. Additionally, the page provides a logout option for securely signing out of the application.
+
+
+Figure 4.5.5 Psychologist Settings Page
+
+4.6 System Testing
+System testing was carried out to ensure that the WellNest Mental Wellness Application functions correctly and satisfies the specified functional requirements. The testing process was aimed at verifying that each feature of the application operated as intended and provided the expected results. All major modules, including authentication, mood tracking, journaling, meditation, AI chatbot, appointment booking, resource management, and administrative functions, were evaluated to ensure reliability, usability, and proper system performance.
+4.6.1 Unit and Integration Testing
+Unit testing was performed on individual modules of the application to verify that each feature functioned correctly in isolation. These modules included user authentication, mood logging, journaling, AI chatbot, appointment scheduling, resource management, psychologist availability, and administrative operations. Integration testing was subsequently conducted to ensure that the various modules interacted seamlessly and that data flowed correctly between the student, psychologist, and administrator interfaces.
+The table below presents the unit and integration test cases carried out on the major modules of the WellNest Mental Wellness Application.
+
+
+Figure 4.1 Test Table
+
+4.6.2 User Acceptance Testing (UAT)
+User Acceptance Testing (UAT) was conducted to determine whether the WellNest Mental Wellness Application met the needs and expectations of its intended users, including university students, psychologists, and administrators. Participants interacted with the application by performing tasks such as creating accounts, completing the personalization process, logging moods, writing journal entries, accessing meditation sessions, interacting with the AI chatbot, booking counseling sessions, managing psychologist availability, and administering platform content.
+The feedback obtained indicated that the application was easy to navigate, responsive, and effective in supporting users' mental wellness activities. Participants also found the interface intuitive and the core features useful for promoting mental well-being. Based on the positive feedback, the application was considered suitable for deployment.
+4.7 System Evaluation
+System evaluation was conducted to determine the effectiveness of the WellNest Mental Wellness Application in achieving the objectives of the study. The evaluation was based on system testing, user acceptance testing, and user feedback to assess whether the developed application satisfied the identified user requirements.
+Objective i: To design a user-centered mental wellness application for university students by applying design thinking to identify user needs and develop an accessible, responsive interface.
+The application was designed using a user-centered approach informed by the design thinking process. User needs were gathered during the empathy and ideation stages, which guided the design of an intuitive and responsive interface. Feedback obtained during usability testing indicated that users found the application easy to navigate and visually appealing. The evaluation therefore confirms that the application successfully achieved this objective.
+Objective ii: To implement a functional mobile-based mental wellness application incorporating wellness tracking and self-care features based on insights gathered from real users.
+The WellNest application successfully integrates several mental wellness features, including mood tracking, journaling, guided meditation sessions, an AI chatbot, mental wellness resources, motivational quotes, and counseling session booking. The application also provides dedicated interfaces for psychologists and administrators to manage appointments, availability, and platform content. System testing confirmed that these features functioned correctly and met the intended requirements, demonstrating that this objective was achieved.
+Objective iii: To evaluate the usability, user engagement, and satisfaction of the developed mental wellness application among university students.
+The usability of the application was evaluated through User Acceptance Testing, during which participants completed common tasks and provided feedback on their experience. The results indicated that users were satisfied with the application's functionality, ease of use, and overall design. Participants reported that the application effectively supported mental wellness activities and encouraged regular engagement with features such as mood tracking, journaling, meditation, and counseling services. These findings confirm that the application achieved the desired level of usability and user satisfaction.
+Overall, the WellNest Mental Wellness Application was found to be functionally complete, user-friendly, and effective in supporting the mental wellness needs of university students. The application successfully met the objectives of the study by providing accessible self-care tools, professional counseling support, and an intuitive user experience. It is suitable for deployment and can be further enhanced with additional features such as mood prediction, wearable device integration, and expanded AI-powered mental health support.
+
+
+
+
+
+
+
+
+CHAPTER FIVE
+SUMMARY, CONCLUSION AND RECOMMENDATION
+5.1 Summary
+The design and implementation of the WellNest Mental Wellness Application were motivated by the growing need to provide university students with accessible, convenient, and user-centered mental health support. Traditional mental health services are often limited by barriers such as stigma, scheduling constraints, and limited access to professional support. These challenges highlighted the need for a digital solution that promotes self-care while providing access to professional counseling.
+To address these challenges, the WellNest Mental Wellness Application was developed as a mobile-based platform that supports students in monitoring and improving their mental well-being. The application provides a range of features, including mood tracking, journaling, guided meditation sessions, an AI chatbot, mental wellness resources, motivational quotes, and appointment booking with licensed psychologists. In addition, psychologists can manage their availability and appointments, while administrators oversee users, psychologists, resources, and overall platform operations.
+The application was implemented using modern software development technologies, with React Native for the mobile application, Node.js and Express.js for the backend services, and MongoDB for database management. The client-server architecture facilitates efficient communication between students, psychologists, and administrators while ensuring reliable data management and system performance.
+Through the application of user-centered design principles and the implementation of essential mental wellness features, the WellNest Mental Wellness Application successfully achieved its intended objectives by providing an accessible, functional, and engaging platform that supports the mental well-being of university students.
+5.2 Conclusion
+The WellNest Mental Wellness Application provides an effective digital solution for supporting the mental well-being of university students. By integrating self-care tools with access to professional psychological services, the application enables students to actively monitor their emotional health and seek timely support whenever necessary.
+The implementation of features such as mood tracking, journaling, guided meditation, AI-powered assistance, educational resources, motivational content, and online appointment scheduling contributes to a comprehensive mental wellness experience. The dedicated interfaces for psychologists and administrators further ensure efficient management of counseling services and platform content.
+The results obtained from system testing and user acceptance testing demonstrate that the application is functional, reliable, user-friendly, and capable of meeting its intended objectives. Overall, the WellNest Mental Wellness Application represents a practical and scalable approach to promoting mental wellness within university communities and has the potential to improve access to mental health support through technology.
+5.3 Recommendations
+To enhance the effectiveness and long-term sustainability of the WellNest Mental Wellness Application, the following recommendations are proposed:
+The application should be deployed on a secure and scalable cloud infrastructure to improve reliability, availability, and data security.
+Push notification services should be enhanced to provide timely reminders for mood tracking, meditation sessions, appointments, and other wellness activities.
+Additional AI capabilities should be incorporated to deliver more personalized wellness recommendations and conversational support based on users' interaction history.
+More guided meditation sessions, wellness exercises, and educational resources should be added regularly to maintain user engagement and address diverse mental wellness needs.
+A secure video consultation feature should be integrated to enable psychologists to conduct virtual counseling sessions directly within the application.
+Regular maintenance, security updates, and performance optimization should be carried out to ensure the application remains reliable and protected against emerging security threats.
+A feedback and rating system should be incorporated to allow students to evaluate their counseling sessions and provide suggestions for improving the platform.
+Future versions of the application could integrate wearable health devices and mood analytics to provide deeper insights into users' emotional well-being and support more personalized mental health interventions.
+
+
+
+REFERENCES
+World Health Organization. (2025, October 8). Mental health – strengthening our response. https://www.who.int/news-room/fact-sheets/detail/mental-health-strengthening-our-response 
+Shetty, D. (2025, September 2). One billion people worldwide are living with mental health disorders. Health Policy Watch. https://healthpolicy-watch.news/whos-latest-data-reveals-a-billion-people-worldwide-are-living-with-mental-health-disorders/ 
+Mental disorders. (n.d.). MedlinePlus. U.S. National Library of Medicine. Retrieved November 15, 2025, from https://medlineplus.gov/mentaldisorders.html 
+Felman, A., & Tee-Melegrito, R. A. (2024, March 22). What is mental health? Definition, common disorders, early signs, and more. Medical News Today. https://www.medicalnewstoday.com/articles/154543 
+National Alliance on Mental Illness. (n.d.). Mental Health by the Numbers. NAMI. Retrieved November 15, 2025, from https://www.nami.org/about-mental-illness/mental-health-by-the-numbers/ 
+Centre for Transforming Access and Student Outcomes. (2023, September 28). Student mental health problems have almost tripled, study finds.  https://taso.org.uk/news-blog/student-mental-health-problems-have-almost-tripled-study-finds/ 
+
+Orok, E., Kukoyi, O., Oluwadare, T., Oni, O., Bamitale, T., Jaiyesimi, B., … Eze, H. (2023). Prevalence and factors associated with mental health problems among undergraduates in a Nigerian university. ResearchGate. https://www.researchgate.net/publication/375476525_Prevalence_and_factors_associated_with_mental_health_problems_among_undergraduates_in_a_Nigerian_university/fulltext/654b8339b1398a779d7252c3/Prevalence-and-factors-associated-with-mental-health-problems-among-undergraduates-in-a-Nigerian-university.pdf 
+
+Davis, A. (2025, February 11). Common causes of mental health issues in students. Clearfork Academy. https://clearforkacademy.com/blog/common-causes-of-mental-health-issues-in-students/ 
+
+(N.d.). Clinmedjournals.org. Retrieved June 3, 2026, from https://www.clinmedjournals.org/articles/ijda/international-journal-of-depression-and-anxiety-ijda-3-022.php 
+Suicide Prevention Resource Center. (n.d.). Consequences of student mental health issues. SPRC. Retrieved November 15, 2025, from https://sprc.org/consequences-of-student-mental-health-issues/ 
+Kukoyi, O., Orok, E., Oluwafemi, F., Oluwadare, T., Oni, O., Bamitale, T., Jaiyesimi, B., Ojo, T., & Eze, H. (2022). Factors affecting the utilization of mental health services among undergraduate students in a Nigerian University. Heliyon, 8(11), e11476. https://doi.org/10.1016/j.heliyon.2022.e11476 
+
+Depression and other common mental disorders. (2017, January 3). Who.int; World Health Organization. https://www.who.int/publications/i/item/depression-global-health-estimates 
+Felman, A., & Tee-Melegrito, R. Ann. (2024, March 22). Mental health: Definition, common disorders, early signs, and more. Medical News Today. https://www.medicalnewstoday.com/articles/154543 
+World Health Organization. (2025, October 8). Mental health – strengthening our response. https://www.who.int/news-room/fact-sheets/detail/mental-health-strengthening-our-response 
+Pan American Health Organization. (n.d.). Mental health. Retrieved November 6, 2025, from https://www.paho.org/en/topics/mental-health 
+United Nations. (n.d.). Understanding mental health [PDF]. United Nations. https://www.un.org/en/healthy-workforce/files/Understanding%20Mental%20Health.pdf  
+Campbell, F., Blank, L., Cantrell, A. et al. Factors that influence mental health of university and college students in the UK: a systematic review. BMC Public Health 22, 1778 (2022). https://doi.org/10.1186/s12889-022-13943-x 
+Scholten, H., & Granic, I. (2019). Use of the principles of design thinking to address limitations of digital mental health interventions for youth: Viewpoint. Journal of Medical Internet Research, 21(1), e11528. https://www.jmir.org/2019/1/e11528/ 
+Lattie, E. G., Lipson, S. K., & Eisenberg, D. (2019). Technology and college student https://www.frontiersin.org/journals/psychiatry/articles/10.3389/fpsyt.2019.00246/full 
+Pedrelli, P., Nyer, M., Yeung, A., Zulauf, C., & Wilens, T. (2015). College students: Mental health problems and treatment considerations. Academic Psychiatry, 39(5), 503–511. https://link.springer.com/article/10.1007/s40596-014-0205-9 
+Wyatt, T., & Oswalt, S. B. (2013). Comparing mental health issues among undergraduate and graduate students. American Journal of Health Education, 44(2), 96–107.  https://www.tandfonline.com/doi/full/10.1080/19325037.2013.764248 
+Porru, F., Schuring, M., Bültmann, U., Portoghese, I., Burdorf, A., & Robroek, S. J. W. (2022). Associations of university students’ study and life conditions with mental well-being during the COVID-19 pandemic: A longitudinal study. European Journal of Public Health, 32(6), 954–961. https://pubmed.ncbi.nlm.nih.gov/34624809 
+Ebenezer, Amawulu & Kurokeyi, Eniyekedidei. (2018). Mental health status of students attending tertiary institutions in Bayelsa State, Nigeria. Journal of Public Health and Epidemiology. 10. 363-369. 10.5897/JPHE2018.0999. https://www.researchgate.net/publication/328639592_Mental_health_status_of_students_attending_tertiary_institutions_in_Bayelsa_State_Nigeria?  
+Akinyemi, A. I. (2023, July 11). Nigeria’s growing population can be an advantage, with better data and a policy focus on young people. The Conversation, https://theconversation.com/nigerias-growing-population-can-be-an-advantage-with-better-data-and-a-policy-focus-on-young-people-209530 
+BusinessTimes.ng. (2018, December 17). 20 percent Nigerians suffer from mental disorder — report. https://businesstimes.ng/20-percent-nigerians-suffer-from-mental-disorder-report/ 
+Learnark. (n.d.). How many students are in Nigerian universities? Learnark. Retrieved [7th November 2025], https://learnark.com/how-many-students-are-in-nigerian-universities/ 
+Statista Research Department. (2021). Number of undergraduate students at universities in Nigeria as of 2019, by ownership Statista. https://www.statista.com/statistics/1262912/number-of-bachelor-students-at-universities-in-nigeria-by-ownership/?srsltid=AfmBOooKuPPQraWGkh6dWxQK83hzOtFgAYvatLHga7kPeE1XHnhOBHBz 
+Firth, J., Torous, J., Nicholas, J., Carney, R., Rosenbaum, S., & Sarris, J. (2017). The efficacy of smartphone-based mental health interventions for depressive symptoms: A meta-analysis of randomized controlled trials. World Psychiatry, 16(3), 287-298. https://onlinelibrary.wiley.com/doi/full/10.1002/wps.20472 
+Firth, J., Torous, J., Nicholas, J., Carney, R., Rosenbaum, S., & Sarris, J. (2017). Can smartphone mental health interventions reduce symptoms of anxiety? A meta-analysis of randomized controlled trials. Journal of Affective Disorders, 218, 15-22. https://www.sciencedirect.com/science/article/pii/S0165032717300150?via%3Dihub 
+Scholten, H., & Granic, I. (2019). Use of the principles of design thinking to address limitations of digital mental health interventions for youth: Viewpoint. Journal of Medical Internet Research, 21(1), e11528. https://www.jmir.org/2019/1/e11528/ 
+Ponzo, S., Morelli, D., Kawadler, J. M., Hemmings, N. R., Bird, G., & Plans, D. (2020). Efficacy of the digital therapeutic mobile app BioBase to reduce stress and improve mental well-being among university students: Randomized controlled trial. JMIR mHealth and uHealth, 8(4), e17767. https://mhealth.jmir.org/2020/4/e17767 
+Oliveira, C., Pereira, A., Vagos, P., Nóbrega, C., Gonçalves, J., & Afonso, B. (2021). Effectiveness of mobile app-based psychological interventions for college students: A systematic review of the literature. Frontiers in Psychology, 12, 647606. https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2021.647606/full 
+Sam, J., Richardson, C. G., & Currie, L. M. (2022). Application of Two-Eyed Seeing in adolescent mental health to bridge design thinking and Indigenous collective storytelling. International Journal of Environmental Research and Public Health, 19(22), 14972. https://www.mdpi.com/1660-4601/19/22/14972 
+Stevens, E. (2023, April 19). What is the design thinking process? The 5 steps complete guide. CareerFoundry. https://careerfoundry.com/en/blog/ux-design/design-thinking-process/ 
+Figma. (n.d.). What is design thinking? + How to apply it. Figma. https://www.figma.com/resource-library/what-is-design-thinking/ 
+Interaction Design Foundation. (2025). What is Design Thinking? Interaction Design Foundation. Retrieved from. https://www.interaction-design.org/literature/topics/design-thinking?srsltid=AfmBOoqGBgJzx1x8C8nzaPKGq-JdQVls-HX9gmOuIdRoX4sBTaB2KMOm 
+Razzouk, R., & Shute, V. (2012). What is design thinking and why is it important? Review of Educational Research, 82(3), 330–348. https://journals.sagepub.com/doi/10.3102/0034654312457429 
+Sam, J., Richardson, C. G., & Currie, L. M. (2022). Applying Design Thinking and Two-Eyed Seeing to develop culturally safe eMental health tools for Indigenous youth. Frontiers in Public Health, 10, 907150. https://pmc.ncbi.nlm.nih.gov/articles/PMC9690396/ 
+Bernaerts S, Van Daele T, Carlsen CK, Nielsen SL, Schaap J, Roke Y. A Design Thinking Approach for Transnational Adaptation of 2 Mobile Mental Health Apps: Tutorial for Researchers and Practitioners. J Med Internet Res. 10.2196/77048. https://pmc.ncbi.nlm.nih.gov/articles/PMC12443347/ 
+
+
+
+
+--- Table ---
+S/N | Requirement | User Role
+1 | Users shall be able to create and access accounts using email authentication or Google sign-in, with password reset and optional anonymous usage | User
+2 | The system shall provide role-based access control to distinguish between administrators, psychologists, and regular users | Admin, Psychologist, User
+3 | Users shall be able to record and log their daily or periodic moods using predefined scales, icons, or short text descriptions | User
+4 | The system shall provide visual representations (charts, timelines) to display mood trends and emotional patterns over time | User
+5 | The system shall provide an AI-driven recommendation engine that suggests personalized wellness activities based on mood history and interactions | User
+6 | The system shall enable context-aware recommendations considering factors such as time of day, stress levels, and user preferences | User
+7 | The system shall provide an AI wellness assistant to respond to user queries, offer coping strategies, and deliver guided exercises | User
+8 | The system shall recommend professional or campus counseling services when repeated signs of emotional distress are detected | User
+9 | The system shall provide a personalized dashboard displaying daily mood summaries, motivational messages, and recent activities | User
+10 | The system shall generate weekly wellness summaries highlighting user progress and potential concerns | User
+11 | Users shall be able to book and manage appointments with psychologists or campus counselors through the app | User
+11 | The system shall provide calendar integration and automated reminders for scheduled counseling sessions | User
+12 | Users shall have access to curated mental health resources (articles) | User
+13 | Users shall be able to search for mental health resources by keyword or filter by category | User
+14 | The system shall provide standardized self-assessment and screening tools for stress, anxiety, and depression | User
+15 | The system shall provide smart notifications and reminders to encourage mood logging, activity completion, and session attendance | User
+16 | Users shall be able to access selected mental health resources offline | User
+17 | The system shall automatically synchronize offline data when internet connectivity is restored | User
+18 | The system shall generate progress reports summarizing mood trends, engagement, and overall wellness | User
+19 | Users shall be able to export wellness reports for personal review or academic evaluation (with consent) | User
+20 | Admin shall manage user accounts, monitor activity, and oversee content updates | Admin
+21 | Admin shall manage content by adding or updating wellness content | Admin
+22 | Admin shall view analytics to monitor usage trends without accessing personal data | Admin
+23 | Psychologists shall manage appointments, review reports, and provide feedback or recommendations | Psychologist
+-------------
+
+
+--- Table ---
+Test Case ID | Test Description | Expected Result | Actual Result | Result
+TC001 | Student registration | Student account created successfully | Account created successfully | PASS
+TC002 | Student login | Login successful | Login successful | PASS
+TC003 | Psychologist registration with valid invitation code | Psychologist account created successfully | Account created successfully | PASS
+TC004 | Psychologist login | Login successful | Login successful | PASS
+TC005 | Admin login | Login successful | Login successful | PASS
+TC006 | Complete student personalization | Personalization preferences saved successfully | Preferences saved successfully | PASS
+TC007 | Log a mood | Mood recorded and stored successfully | Mood logged successfully | PASS
+TC008 | Create a journal entry | Journal entry saved successfully | Journal entry saved successfully | PASS
+TC009 | Play a meditation session | Selected meditation session starts successfully | Meditation session played successfully | PASS
+TC010 | Interact with AI chatbot | Chatbot provides appropriate response | Response generated successfully | PASS
+TC011 | View mental wellness resources | Resources displayed successfully | Resources displayed correctly | PASS
+TC012 | Book a counseling session | Appointment booked successfully | Appointment created successfully | PASS
+TC013 | Psychologist updates availability | Availability schedule saved successfully | Schedule updated successfully | PASS
+TC014 | Admin creates psychologist invitation | Invitation token generated successfully | Invitation created successfully | PASS
+TC015 | Admin uploads a mental wellness resource | Resource added successfully | Resource uploaded successfully | PASS
+TC016 | Admin adds a motivational quote | Quote saved successfully | Quote added successfully | PASS
+TC017 | Update user profile | Updated profile information saved | Profile updated successfully | PASS
+TC018 | Logout (Student, Psychologist, or Admin) | User redirected to login page and session terminated | Logout successful | PASS
+-------------

@@ -49,6 +49,12 @@ function ProfileSettings({ user, navigateTo }) {
       updated.reduce_motion = true;
       updated.dyslexia_font = true;
       updated.font_size = 'md';
+    } else if (mode === 'physical') {
+      updated.high_contrast = false;
+      updated.screen_reader_optimized = false;
+      updated.reduce_motion = false;
+      updated.dyslexia_font = false;
+      updated.font_size = 'md';
     } else {
       updated.high_contrast = false;
       updated.screen_reader_optimized = false;
@@ -62,23 +68,28 @@ function ProfileSettings({ user, navigateTo }) {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!fullName.trim() || !email.trim()) {
+      setStatus({ message: 'Full name and email are required.', type: 'error' });
+      return;
+    }
     setSaving(true);
-    setStatus({ message: 'Saving preferences...', type: 'info' });
+    setStatus({ message: 'Saving profile and preferences...', type: 'info' });
 
     try {
-      // First, update preferences
-      const updatedUser = await api('/auth/preferences', {
+      const updatedUser = await api('/auth/profile', {
         method: 'PUT',
-        body: localPrefs
+        body: {
+          ...localPrefs,
+          full_name: fullName.trim(),
+          email: email.trim()
+        }
       });
 
-      // Normally we would also update profile name/email if edited, but for this final year project scope,
-      // preference updates are the main profile configuration action.
       const token = localStorage.getItem('accesslearn_token');
       setSession(token, updatedUser);
       updatePreferences(updatedUser);
-      setStatus({ message: 'Profile and preferences updated successfully!', type: 'success' });
-      setTimeout(() => setStatus({ message: '', type: '' }), 3000);
+      setStatus({ message: 'Profile and workspace settings updated successfully!', type: 'success' });
+      setTimeout(() => setStatus({ message: '', type: '' }), 4000);
     } catch (err) {
       setStatus({ message: `Failed to save: ${err.message}`, type: 'error' });
     } finally {
@@ -116,8 +127,9 @@ function ProfileSettings({ user, navigateTo }) {
                 id="profile-name"
                 className="form-control"
                 value={fullName}
-                disabled
-                title="Contact support to change core credentials"
+                onChange={(e) => setFullName(e.target.value)}
+                disabled={saving}
+                required
               />
             </div>
             <div className="form-group">
@@ -127,8 +139,9 @@ function ProfileSettings({ user, navigateTo }) {
                 id="profile-email"
                 className="form-control"
                 value={email}
-                disabled
-                title="Contact support to change core credentials"
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={saving}
+                required
               />
             </div>
           </div>
@@ -200,6 +213,7 @@ function ProfileSettings({ user, navigateTo }) {
               <option value="visual">Visual Impairment Mode (Narration, High contrast)</option>
               <option value="hearing">Deaf / Hard of Hearing Mode (Forced video captions)</option>
               <option value="cognitive">Cognitive / Attention Mode (Timer free, Simplified text)</option>
+              <option value="physical">Physical / Motor Impairment Mode (Keyboard focus rings)</option>
             </select>
           </div>
 

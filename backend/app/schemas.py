@@ -28,6 +28,12 @@ class UserCreate(AccessibilityPreferences):
     role: Role = "learner"
 
 
+class UserProfileUpdate(AccessibilityPreferences):
+    full_name: str = Field(min_length=2, max_length=120)
+    email: EmailStr
+
+
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str = Field(min_length=1)

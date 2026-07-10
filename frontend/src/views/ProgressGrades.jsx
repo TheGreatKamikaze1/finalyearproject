@@ -21,7 +21,24 @@ function ProgressGrades({ user, navigateTo }) {
           api('/progress/me'),
           api('/quizzes/results/me')
         ]);
-        setCourses(enrolledCourses);
+
+        // Fetch materials and quizzes for each enrolled course to calculate real progress and quiz details
+        const coursesWithDetails = await Promise.all(
+          enrolledCourses.map(async (course) => {
+            try {
+              const [materials, quizzes] = await Promise.all([
+                api(`/courses/${course.id}/materials`),
+                api(`/courses/${course.id}/quizzes`)
+              ]);
+              return { ...course, materials, quizzes };
+            } catch (err) {
+              console.error(`Failed to load details for course ${course.id}:`, err);
+              return { ...course, materials: [], quizzes: [] };
+            }
+          })
+        );
+
+        setCourses(coursesWithDetails);
         setMaterialsProgress(myProgress);
         setQuizResults(results);
       } catch (err) {
@@ -50,6 +67,17 @@ function ProgressGrades({ user, navigateTo }) {
     }
   });
 
+  // Map quiz results to their details
+  const quizMap = {};
+  courses.forEach(course => {
+    course.quizzes?.forEach(quiz => {
+      quizMap[quiz.id] = {
+        title: quiz.title,
+        courseCode: course.course_code || 'GEN-101'
+      };
+    });
+  });
+
   return (
     <div className="main-content" style={{ maxWidth: '850px', margin: '0 auto' }}>
       <header style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
@@ -76,44 +104,43 @@ function ProgressGrades({ user, navigateTo }) {
             You are not enrolled in any courses yet.
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {courses.map(course => {
-              // Calculate completions
-              // Note: Normally we fetch course materials, since we don't have them cached here let's stub or use progress count
-              const completedCount = materialsProgress.filter(p => completedLessonsMap[p.material_id]).length;
-              
-              return (
-                <article key={course.id} className="glass-card p-4" style={{ background: '#fff' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    <div>
-                      <span className="course-code">{course.course_code || 'GEN-101'}</span>
-                      <h3 style={{ fontSize: '1.15rem', marginTop: '0.1rem' }}>{course.title}</h3>
-                    </div>
-                  </div>
+          <div className="glass-card p-4" style={{ background: '#fff', overflowX: 'auto' }}>
+            <table className="a11y-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: '550px' }}>
+              <caption style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', border: 0 }}>
+                A list of enrolled courses with course code, title, completed lessons, total lessons, and progress percentage.
+              </caption>
+              <thead>
+                <tr style={{ borderBottom: '2px solid var(--line)', textAlign: 'left' }}>
+                  <th scope="col" style={{ padding: '0.75rem 1rem', fontWeight: 800 }}>Course Code</th>
+                  <th scope="col" style={{ padding: '0.75rem 1rem', fontWeight: 800 }}>Course Title</th>
+                  <th scope="col" style={{ padding: '0.75rem 1rem', fontWeight: 800 }}>Completed Lessons</th>
+                  <th scope="col" style={{ padding: '0.75rem 1rem', fontWeight: 800 }}>Total Lessons</th>
+                  <th scope="col" style={{ padding: '0.75rem 1rem', fontWeight: 800 }}>Progress (%)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {courses.map(course => {
+                  const courseMaterials = course.materials || [];
+                  const totalLessonsCount = courseMaterials.length;
+                  const completedLessonsInCourse = courseMaterials.filter(m => completedLessonsMap[m.id]).length;
+                  const completionPercentage = totalLessonsCount > 0 ? Math.round((completedLessonsInCourse / totalLessonsCount) * 100) : 0;
 
-                  {/* Progress tracker depending on mode */}
-                  {mode === 'cognitive' ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--paper)', padding: '0.75rem 1rem', borderRadius: '8px' }}>
-                      <span style={{ fontSize: '1.5rem' }}>📖</span>
-                      <span style={{ fontWeight: 800 }}>Completed lessons: {completedCount} modules finished! Keep up the good work!</span>
-                    </div>
-                  ) : (
-                    <div>
-                      <div className="progress-bar-container" style={{ margin: '0.5rem 0 0.25rem' }}>
-                        <div className="progress-track">
-                          {/* Approximate length filled */}
-                          <div className="progress-fill" style={{ width: `${completedCount > 0 ? 50 : 0}%`, backgroundColor: 'var(--brand)' }}></div>
-                        </div>
-                        <span style={{ fontWeight: 800 }}>{completedCount > 0 ? "50%" : "0%"} Complete</span>
-                      </div>
-                      <span style={{ fontSize: '0.82rem', color: 'var(--muted)' }}>
-                        ({completedCount} modules marked complete)
-                      </span>
-                    </div>
-                  )}
-                </article>
-              );
-            })}
+                  return (
+                    <tr key={course.id} style={{ borderBottom: '1px solid var(--line)' }}>
+                      <th scope="row" style={{ padding: '1rem', fontWeight: 800, textAlign: 'left' }}>
+                        {course.course_code || 'GEN-101'}
+                      </th>
+                      <td style={{ padding: '1rem' }}>{course.title}</td>
+                      <td style={{ padding: '1rem' }}>{completedLessonsInCourse} lessons</td>
+                      <td style={{ padding: '1rem' }}>{totalLessonsCount} lessons</td>
+                      <td style={{ padding: '1rem', fontWeight: 900, color: 'var(--brand)' }}>
+                        {completionPercentage}%
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </section>
@@ -130,31 +157,58 @@ function ProgressGrades({ user, navigateTo }) {
             No quizzes completed yet.
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {quizResults.map(res => (
-              <article key={res.id} className="glass-card p-4" style={{ background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>Assessment Quiz Result</h3>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>
-                    Completed on: {new Date(res.completed_at).toLocaleDateString()}
-                  </span>
-                </div>
-
-                {mode === 'cognitive' ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--warning-light)', padding: '0.5rem 1rem', borderRadius: '20px', border: '1px solid var(--warning)' }}>
-                    <Award size={18} style={{ color: 'var(--warning)' }} />
-                    <span style={{ fontWeight: 800 }}>Passed! Score: {Math.round(res.score)}%</span>
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div style={{ textAlign: 'right' }}>
-                      <span style={{ display: 'block', fontSize: '0.78rem', color: 'var(--muted)', fontWeight: 800 }}>SCORE</span>
-                      <span style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--brand)' }}>{Math.round(res.score * 10) / 10}%</span>
-                    </div>
-                  </div>
-                )}
-              </article>
-            ))}
+          <div className="glass-card p-4" style={{ background: '#fff', overflowX: 'auto' }}>
+            <table className="a11y-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: '550px' }}>
+              <caption style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', border: 0 }}>
+                A transcript of completed quizzes, including course code, quiz title, completion date, total questions, score percentage, and status.
+              </caption>
+              <thead>
+                <tr style={{ borderBottom: '2px solid var(--line)', textAlign: 'left' }}>
+                  <th scope="col" style={{ padding: '0.75rem 1rem', fontWeight: 800 }}>Course</th>
+                  <th scope="col" style={{ padding: '0.75rem 1rem', fontWeight: 800 }}>Quiz Title</th>
+                  <th scope="col" style={{ padding: '0.75rem 1rem', fontWeight: 800 }}>Completion Date</th>
+                  <th scope="col" style={{ padding: '0.75rem 1rem', fontWeight: 800 }}>Total Questions</th>
+                  <th scope="col" style={{ padding: '0.75rem 1rem', fontWeight: 800 }}>Grade Score</th>
+                  <th scope="col" style={{ padding: '0.75rem 1rem', fontWeight: 800 }}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {quizResults.map(res => {
+                  const quizInfo = quizMap[res.quiz_id] || { title: 'Assessment Quiz', courseCode: 'GEN-101' };
+                  const percentScore = Math.round(res.score * 10) / 10;
+                  const isPass = percentScore >= 50.0;
+                  
+                  return (
+                    <tr key={res.id} style={{ borderBottom: '1px solid var(--line)' }}>
+                      <th scope="row" style={{ padding: '1rem', fontWeight: 800, textAlign: 'left' }}>{quizInfo.courseCode}</th>
+                      <td style={{ padding: '1rem' }}>{quizInfo.title}</td>
+                      <td style={{ padding: '1rem' }}>{new Date(res.completed_at).toLocaleDateString()}</td>
+                      <td style={{ padding: '1rem' }}>{res.total_questions} questions</td>
+                      <td style={{ padding: '1rem', fontWeight: 900, color: isPass ? 'var(--success)' : 'var(--accent)' }}>
+                        {percentScore}%
+                      </td>
+                      <td style={{ padding: '1rem' }}>
+                        <span 
+                          className={`badge-a11y-pill`} 
+                          style={{ 
+                            margin: 0, 
+                            display: 'inline-block',
+                            background: isPass ? 'var(--success-light)' : 'var(--accent-light)', 
+                            color: isPass ? 'var(--success)' : 'var(--accent)', 
+                            borderColor: isPass ? 'var(--success)' : 'var(--accent)', 
+                            borderWidth: '1px', 
+                            borderStyle: 'solid',
+                            fontWeight: 800
+                          }}
+                        >
+                          {isPass ? 'PASS' : 'FAIL'}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </section>

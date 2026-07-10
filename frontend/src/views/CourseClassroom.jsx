@@ -4,7 +4,7 @@ import { useAccessibility } from '../context/AccessibilityContext';
 import { ArrowLeft, BookOpen, FileText, Headphones, Video, CheckCircle2, Play, Pause, Square, Volume2, ExternalLink, Scroll, Check, MessageSquare, ClipboardList, HelpCircle } from 'lucide-react';
 
 function CourseClassroom({ user, courseId, navigateTo }) {
-  const { preferences, speak, pauseSpeech, stopSpeech, speakingState } = useAccessibility();
+  const { preferences, speak, pauseSpeech, stopSpeech, speakingState, rulerActive, setRulerActive } = useAccessibility();
   const [course, setCourse] = useState(null);
   const [materials, setMaterials] = useState([]);
   const [selectedMat, setSelectedMat] = useState(null);
@@ -23,6 +23,7 @@ function CourseClassroom({ user, courseId, navigateTo }) {
 
   // Sign Language overlay slot
   const [showSignLanguagePiP, setShowSignLanguagePiP] = useState(false);
+  const [activeMediaTab, setActiveMediaTab] = useState('video'); // 'video', 'sign', 'captions', 'transcript'
 
   // Load Course and Materials
   useEffect(() => {
@@ -61,6 +62,7 @@ function CourseClassroom({ user, courseId, navigateTo }) {
     setSelectedMat(mat);
     setAccItems([]);
     setShowSignLanguagePiP(false);
+    setActiveMediaTab(mat.material_type === 'audio' ? 'audio' : 'video');
 
     // Fetch related captions/transcripts/sign language tracks
     try {
@@ -347,6 +349,19 @@ function CourseClassroom({ user, courseId, navigateTo }) {
                         <option value="1.6rem">Extra Large</option>
                       </select>
                     </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <button
+                        type="button"
+                        className={`btn btn-sm ${rulerActive ? 'btn-primary' : 'btn-secondary'}`}
+                        onClick={() => setRulerActive(!rulerActive)}
+                        style={{ height: '28px', minHeight: '28px', padding: '0 0.75rem', fontSize: '0.8rem', fontWeight: 800 }}
+                        aria-pressed={rulerActive}
+                        aria-label="Toggle Dyslexia Reading Ruler overlay"
+                      >
+                        {rulerActive ? '📏 Disable Ruler' : '📏 Enable Ruler'}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -398,122 +413,153 @@ function CourseClassroom({ user, courseId, navigateTo }) {
               </div>
             )}
 
-            {/* AUDIO LESSON W/ TRANSCRIPT */}
+            {/* AUDIO LESSON W/ TRANSCRIPT TABS */}
             {selectedMat.material_type === 'audio' && (
-              <div className="glass-card p-5" style={{ background: '#fff', textAlign: 'center' }}>
-                <Headphones size={64} style={{ color: 'var(--brand)', marginBottom: '1.5rem' }} />
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
-                  <audio controls src={selectedMat.file_url} style={{ width: '100%', maxWidth: '600px' }} />
-                </div>
+              <div className="glass-card p-4" style={{ background: '#fff' }}>
+                <nav className="tab-nav" style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--line)', paddingBottom: '0.5rem' }}>
+                  <button 
+                    type="button"
+                    className={`tab-btn ${activeMediaTab === 'audio' ? 'active' : ''}`}
+                    onClick={() => setActiveMediaTab('audio')}
+                    style={{ flex: 1, padding: '0.75rem', fontWeight: 800 }}
+                  >
+                    🎵 Audio Player
+                  </button>
+                  {transcript && (
+                    <button 
+                      type="button"
+                      className={`tab-btn ${activeMediaTab === 'transcript' ? 'active' : ''}`}
+                      onClick={() => setActiveMediaTab('transcript')}
+                      style={{ flex: 1, padding: '0.75rem', fontWeight: 800 }}
+                    >
+                      📜 Text Transcript
+                    </button>
+                  )}
+                </nav>
 
-                {transcript ? (
-                  <article className="transcript-block">
-                    <div className="transcript-header">
-                      <Scroll size={16} />
-                      <span>Audio Lesson Transcript</span>
+                {activeMediaTab === 'audio' && (
+                  <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
+                    <Headphones size={64} style={{ color: 'var(--brand)', marginBottom: '1.5rem' }} />
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                      <audio controls src={selectedMat.file_url} style={{ width: '100%', maxWidth: '600px' }} />
                     </div>
-                    <div className="transcript-body" style={{ textAlign: 'left' }}>
+                  </div>
+                )}
+
+                {activeMediaTab === 'transcript' && transcript && (
+                  <article className="transcript-block" style={{ marginTop: 0 }}>
+                    <div className="transcript-header" style={{ borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
+                      <Scroll size={16} />
+                      <span>Audio Lesson Text Transcript</span>
+                    </div>
+                    <div className="transcript-body" style={{ textAlign: 'left', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' }}>
                       {transcript.content_text?.split('\n').map((para, i) => (
                         <p key={i} style={{ marginBottom: '0.75rem' }}>{para}</p>
                       ))}
                     </div>
                   </article>
-                ) : (
-                  <div style={{ padding: '1rem', background: 'var(--paper)', borderRadius: '6px', color: 'var(--muted)', fontSize: '0.9rem' }}>
-                    No transcript has been uploaded for this audio resource.
-                  </div>
                 )}
               </div>
             )}
 
-            {/* VIDEO LESSON W/ CAPTIONS, TRANSCRIPTS & SIGN LANGUAGE PiP SLOT */}
+            {/* VIDEO LESSON W/ CAPTIONS, TRANSCRIPTS & SIGN LANGUAGE INTERPRETER TABS */}
             {selectedMat.material_type === 'video' && (
-              <div className="glass-card p-4" style={{ background: '#fff', textAlign: 'center' }}>
-                <div style={{ maxWidth: '720px', margin: '0 auto 1.5rem', background: '#000', borderRadius: '12px', overflow: 'hidden' }}>
-                  <video 
-                    controls 
-                    style={{ width: '100%', display: 'block', maxHeight: '420px' }}
-                    src={selectedMat.file_url}
+              <div className="glass-card p-4" style={{ background: '#fff' }}>
+                <nav className="tab-nav" style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', borderBottom: '1px solid var(--line)', paddingBottom: '0.5rem' }}>
+                  <button 
+                    type="button"
+                    className={`tab-btn ${activeMediaTab === 'video' ? 'active' : ''}`}
+                    onClick={() => setActiveMediaTab('video')}
+                    style={{ flex: 1, padding: '0.75rem', fontWeight: 800 }}
                   >
-                    {captions && captions.file_url && (
-                      <track 
-                        kind="captions" 
-                        src={captions.file_url} 
-                        srcLang="en" 
-                        label="English" 
-                        default 
-                      />
-                    )}
-                    Your browser does not support HTML5 video tag formats.
-                  </video>
-                </div>
-
-                {/* Sign language picture in picture toggler */}
-                {signLanguage && signLanguage.file_url && (
-                  <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '1.5rem' }}>
+                    🎥 Video Stream
+                  </button>
+                  {signLanguage && (
                     <button 
-                      className={`btn ${showSignLanguagePiP ? 'btn-primary' : 'btn-outline-brand'}`} 
-                      onClick={() => setShowSignLanguagePiP(!showSignLanguagePiP)}
-                      aria-pressed={showSignLanguagePiP}
-                      aria-label="Toggle Sign Language Interpreter picture-in-picture window"
+                      type="button"
+                      className={`tab-btn ${activeMediaTab === 'sign' ? 'active' : ''}`}
+                      onClick={() => setActiveMediaTab('sign')}
+                      style={{ flex: 1, padding: '0.75rem', fontWeight: 800 }}
                     >
-                      📺 {showSignLanguagePiP ? "Hide Sign Interpreter (PiP)" : "Show Sign Interpreter (PiP)"}
+                      📺 Sign-Language Overlay
                     </button>
+                  )}
+                  {captions && (
+                    <button 
+                      type="button"
+                      className={`tab-btn ${activeMediaTab === 'captions' ? 'active' : ''}`}
+                      onClick={() => setActiveMediaTab('captions')}
+                      style={{ flex: 1, padding: '0.75rem', fontWeight: 800 }}
+                    >
+                      💬 Captions / Text Track
+                    </button>
+                  )}
+                  {transcript && (
+                    <button 
+                      type="button"
+                      className={`tab-btn ${activeMediaTab === 'transcript' ? 'active' : ''}`}
+                      onClick={() => setActiveMediaTab('transcript')}
+                      style={{ flex: 1, padding: '0.75rem', fontWeight: 800 }}
+                    >
+                      📜 Text Transcript
+                    </button>
+                  )}
+                </nav>
+
+                {activeMediaTab === 'video' && (
+                  <div style={{ maxWidth: '720px', margin: '0 auto', background: '#000', borderRadius: '12px', overflow: 'hidden' }}>
+                    <video 
+                      controls 
+                      style={{ width: '100%', display: 'block', maxHeight: '420px' }}
+                      src={selectedMat.file_url}
+                    >
+                      {captions && captions.file_url && (
+                        <track 
+                          kind="captions" 
+                          src={captions.file_url} 
+                          srcLang="en" 
+                          label="English" 
+                          default 
+                        />
+                      )}
+                    </video>
                   </div>
                 )}
 
-                {transcript ? (
-                  <article className="transcript-block">
-                    <div className="transcript-header">
+                {activeMediaTab === 'sign' && signLanguage && (
+                  <div style={{ maxWidth: '720px', margin: '0 auto', background: '#000', borderRadius: '12px', overflow: 'hidden', padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <h3 style={{ color: '#fff', marginBottom: '1rem', fontSize: '1rem' }}>Sign Language Interpreter Stream</h3>
+                    <video 
+                      src={signLanguage.file_url}
+                      controls
+                      loop
+                      style={{ width: '100%', maxWidth: '480px', display: 'block', maxHeight: '360px', borderRadius: '8px' }}
+                    />
+                  </div>
+                )}
+
+                {activeMediaTab === 'captions' && captions && (
+                  <div style={{ padding: '2rem', background: 'var(--paper)', borderRadius: '12px', border: '1px solid var(--line)', textAlign: 'left' }}>
+                    <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: 'var(--brand-dark)' }}>Captions File Content</h3>
+                    <p style={{ fontSize: '1.1rem', fontStyle: 'italic', color: 'var(--ink)', lineHeight: '1.8' }}>
+                      {captions.content_text || "Visual captions loaded. Play the video resource to see overlay transcripts."}
+                    </p>
+                  </div>
+                )}
+
+                {activeMediaTab === 'transcript' && transcript && (
+                  <article className="transcript-block" style={{ marginTop: 0 }}>
+                    <div className="transcript-header" style={{ borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
                       <Scroll size={16} />
                       <span>Video Lesson Text Transcript</span>
                     </div>
-                    <div className="transcript-body" style={{ textAlign: 'left' }}>
+                    <div className="transcript-body" style={{ textAlign: 'left', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' }}>
                       {transcript.content_text?.split('\n').map((para, i) => (
                         <p key={i} style={{ marginBottom: '0.75rem' }}>{para}</p>
                       ))}
                     </div>
                   </article>
-                ) : (
-                  <div style={{ padding: '1rem', background: 'var(--paper)', borderRadius: '6px', color: 'var(--muted)', fontSize: '0.9rem' }}>
-                    No transcript has been provided for this video resource.
-                  </div>
                 )}
-              </div>
-            )}
-
-            {/* Floating Sign Language picture-in-picture box overlay */}
-            {showSignLanguagePiP && signLanguage && (
-              <div 
-                className="sign-language-pip-box glass-card"
-                style={{
-                  position: 'fixed',
-                  bottom: '2rem',
-                  right: '2rem',
-                  width: '260px',
-                  zIndex: 200,
-                  overflow: 'hidden',
-                  boxShadow: 'var(--shadow-lg)',
-                  border: '2px solid var(--brand)'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--brand-dark)', color: '#fff', padding: '0.4rem 0.8rem', fontSize: '0.8rem', fontWeight: 800 }}>
-                  <span>Sign Language Track</span>
-                  <button 
-                    onClick={() => setShowSignLanguagePiP(false)} 
-                    style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}
-                    aria-label="Close Sign Language Interpreter window"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <video 
-                  src={signLanguage.file_url}
-                  controls
-                  loop
-                  muted
-                  style={{ width: '100%', display: 'block', maxHeight: '180px', background: '#000' }}
-                />
               </div>
             )}
 

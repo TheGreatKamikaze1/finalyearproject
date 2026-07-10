@@ -23,6 +23,7 @@ from app.models import (
 )
 from app.schemas import (
     AccessibilityPreferences,
+    UserProfileUpdate,
     MessageOut,
     TokenOut,
     UserCreate,
@@ -242,11 +243,45 @@ def update_preferences(
     current_user.font_size = payload.font_size
     current_user.accessibility_mode = payload.accessibility_mode
     current_user.guardian_contact_name = payload.guardian_contact_name
-    current_user.guardian_contact_info = payload.guardian_contact_info
     db.add(current_user)
     db.commit()
     db.refresh(current_user)
     return serialize_user(current_user)
+
+
+@app.put("/auth/profile", response_model=UserOut)
+def update_profile(
+    payload: UserProfileUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if payload.email.lower() != current_user.email:
+        existing_user = db.scalar(select(User).where(User.email == payload.email.lower()))
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="An account already exists for this email.",
+            )
+        current_user.email = payload.email.lower()
+
+    current_user.full_name = payload.full_name.strip()
+    current_user.disability_profile = json.dumps(payload.disability_profile)
+    current_user.preferred_format = payload.preferred_format
+    current_user.high_contrast = payload.high_contrast
+    current_user.reduce_motion = payload.reduce_motion
+    current_user.captions_required = payload.captions_required
+    current_user.screen_reader_optimized = payload.screen_reader_optimized
+    current_user.dyslexia_font = payload.dyslexia_font
+    current_user.font_size = payload.font_size
+    current_user.accessibility_mode = payload.accessibility_mode
+    current_user.guardian_contact_name = payload.guardian_contact_name
+    current_user.guardian_contact_info = payload.guardian_contact_info
+    
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    return serialize_user(current_user)
+
 
 
 

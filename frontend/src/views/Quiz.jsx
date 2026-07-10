@@ -18,7 +18,42 @@ function Quiz({ user, courseId, navigateTo }) {
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds default
   const timerRef = useRef(null);
 
+  // Audio question playback
+  const [playingAudioId, setPlayingAudioId] = useState(null);
+  const audioRef = useRef(null);
+
   const mode = preferences.accessibility_mode || 'standard';
+
+  const handleAddExtraTime = (minutes) => {
+    setTimeLeft(prev => prev + (minutes * 60));
+  };
+
+  const handlePlayAudioQuestion = (audioUrl, questionId) => {
+    stopSpeech();
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    
+    if (playingAudioId === questionId) {
+      setPlayingAudioId(null);
+      return;
+    }
+
+    audioRef.current = new Audio(audioUrl);
+    audioRef.current.play();
+    setPlayingAudioId(questionId);
+
+    audioRef.current.onended = () => {
+      setPlayingAudioId(null);
+    };
+  };
+
+  const handleStopAudioQuestion = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setPlayingAudioId(null);
+    }
+  };
 
   useEffect(() => {
     async function loadQuizzes() {
@@ -82,6 +117,7 @@ function Quiz({ user, courseId, navigateTo }) {
 
   const handleNext = () => {
     stopSpeech();
+    handleStopAudioQuestion();
     if (currentQuestionIndex < activeQuiz.questions.length - 1) {
       const nextIdx = currentQuestionIndex + 1;
       setCurrentQuestionIndex(nextIdx);
@@ -93,6 +129,7 @@ function Quiz({ user, courseId, navigateTo }) {
 
   const handlePrev = () => {
     stopSpeech();
+    handleStopAudioQuestion();
     if (currentQuestionIndex > 0) {
       const prevIdx = currentQuestionIndex - 1;
       setCurrentQuestionIndex(prevIdx);
@@ -177,6 +214,7 @@ function Quiz({ user, courseId, navigateTo }) {
   // Helper cleanup on exit
   const handleExitQuiz = () => {
     stopSpeech();
+    handleStopAudioQuestion();
     if (timerRef.current) clearInterval(timerRef.current);
     setActiveQuiz(null);
     setQuizResult(null);
@@ -253,21 +291,41 @@ function Quiz({ user, courseId, navigateTo }) {
                 <span>🌟 Relaxed learning: No timer active</span>
               </div>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                 {/* Extended time switch toggle */}
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginRight: '1rem', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginRight: '0.5rem', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem' }}>
                   <input 
                     type="checkbox" 
                     checked={extendedTime} 
                     onChange={(e) => setExtendedTime(e.target.checked)}
                     disabled={currentQuestionIndex > 0 || Object.keys(selectedAnswers).length > 0} 
                   />
-                  <span>Extend Time (20 min)</span>
+                  <span>Extended Base (20 min)</span>
                 </label>
+
+                {/* Extra time buttons */}
+                <button 
+                  type="button"
+                  onClick={() => handleAddExtraTime(5)} 
+                  className="btn btn-secondary btn-sm"
+                  style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', height: '28px', minHeight: '28px' }}
+                  aria-label="Add 5 minutes of extra time"
+                >
+                  +5 Min
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => handleAddExtraTime(10)} 
+                  className="btn btn-secondary btn-sm"
+                  style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', height: '28px', minHeight: '28px' }}
+                  aria-label="Add 10 minutes of extra time"
+                >
+                  +10 Min
+                </button>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: timeLeft < 60 ? 'var(--accent)' : 'var(--muted)', fontWeight: 800 }}>
                   <Timer size={16} />
-                  <span aria-label={`Time left: ${formatTime(timeLeft)}`}>{formatTime(timeLeft)}</span>
+                  <span aria-live="polite" aria-label={`Time left: ${formatTime(timeLeft)}`}>{formatTime(timeLeft)}</span>
                 </div>
               </div>
             )}
@@ -300,15 +358,40 @@ function Quiz({ user, courseId, navigateTo }) {
                   </span>
                 )}
 
-                {/* Speak question button */}
-                <button 
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => handleSpeakQuestion(activeQuiz.questions[currentQuestionIndex])}
-                  aria-label="Read question and options aloud"
-                >
-                  <Volume2 size={14} />
-                  <span>Narration</span>
-                </button>
+                {/* Audio version of question if available, else TTS fallback */}
+                {activeQuiz.questions[currentQuestionIndex].audio_url ? (
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <button 
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={() => handlePlayAudioQuestion(activeQuiz.questions[currentQuestionIndex].audio_url, activeQuiz.questions[currentQuestionIndex].id)}
+                      aria-label="Play pre-recorded audio question"
+                    >
+                      {playingAudioId === activeQuiz.questions[currentQuestionIndex].id ? <Pause size={14} /> : <Play size={14} />}
+                      <span>{playingAudioId === activeQuiz.questions[currentQuestionIndex].id ? 'Pause Audio' : 'Play Audio Question'}</span>
+                    </button>
+                    {playingAudioId === activeQuiz.questions[currentQuestionIndex].id && (
+                      <button 
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={handleStopAudioQuestion}
+                        aria-label="Stop audio version"
+                      >
+                        Stop
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <button 
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => handleSpeakQuestion(activeQuiz.questions[currentQuestionIndex])}
+                    aria-label="Read question and options aloud"
+                  >
+                    <Volume2 size={14} />
+                    <span>Narration</span>
+                  </button>
+                )}
               </div>
 
               {/* Question card */}
@@ -329,6 +412,14 @@ function Quiz({ user, courseId, navigateTo }) {
                           <label 
                             key={oIdx}
                             htmlFor={labelId}
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === ' ' || e.key === 'Enter') {
+                                e.preventDefault();
+                                handleAnswerSelect(q.id, opt);
+                              }
+                            }}
+                            className="quiz-option-label"
                             style={{ 
                               display: 'flex', 
                               alignItems: 'center', 
@@ -348,6 +439,7 @@ function Quiz({ user, courseId, navigateTo }) {
                               id={labelId}
                               checked={isSelected}
                               onChange={() => handleAnswerSelect(q.id, opt)}
+                              tabIndex={-1}
                               style={{ width: '18px', height: '18px', accentColor: 'var(--brand)' }}
                             />
                             <span>{opt}</span>

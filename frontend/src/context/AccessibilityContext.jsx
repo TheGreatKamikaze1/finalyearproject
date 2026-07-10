@@ -41,6 +41,7 @@ export function AccessibilityProvider({ children }) {
     body.classList.toggle('mode-visual', mode === 'visual');
     body.classList.toggle('mode-hearing', mode === 'hearing');
     body.classList.toggle('mode-cognitive', mode === 'cognitive');
+    body.classList.toggle('mode-physical', mode === 'physical');
 
     // High Contrast: forced if mode is visual, otherwise user preference
     const highContrastEnabled = mode === 'visual' ? true : Boolean(prefs.high_contrast);

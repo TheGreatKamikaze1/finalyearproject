@@ -7,6 +7,7 @@ function Dashboard({ user, onLogout, navigateTo }) {
   const { preferences, updatePreferences, rulerActive, setRulerActive } = useAccessibility();
   const [courses, setCourses] = useState([]);
   const [enrolled, setEnrolled] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState('learning'); // 'learning' or 'catalog'
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -20,17 +21,19 @@ function Dashboard({ user, onLogout, navigateTo }) {
     setLocalPrefs({ ...preferences });
   }, [preferences]);
 
-  // Fetch courses and enrollments
+  // Fetch courses, enrollments, and announcements
   useEffect(() => {
     async function loadDashboardData() {
       try {
         setLoading(true);
-        const [allCourses, enrolledCourses] = await Promise.all([
+        const [allCourses, enrolledCourses, allNotifications] = await Promise.all([
           api('/courses'),
           api('/courses/enrolled'),
+          api('/notifications'),
         ]);
         setCourses(allCourses);
         setEnrolled(enrolledCourses);
+        setNotifications(allNotifications);
       } catch (err) {
         console.error("Dashboard data load failed:", err);
       } finally {
@@ -83,6 +86,12 @@ function Dashboard({ user, onLogout, navigateTo }) {
       updated.reduce_motion = true;
       updated.dyslexia_font = true;
       updated.font_size = 'md';
+    } else if (modeValue === 'physical') {
+      updated.high_contrast = false;
+      updated.screen_reader_optimized = false;
+      updated.reduce_motion = false;
+      updated.dyslexia_font = false;
+      updated.font_size = 'md';
     } else {
       // standard defaults
       updated.high_contrast = false;
@@ -125,19 +134,22 @@ function Dashboard({ user, onLogout, navigateTo }) {
       return "<strong>Deaf / Hard of Hearing mode active:</strong> Video captions are forced on by default. You can open toggleable transcripts below lessons, or click <strong>PiP</strong> to open sign language overlay streams.";
     } else if (activeMode === 'cognitive') {
       return "<strong>Cognitive mode active:</strong> We have simplified layouts and disabled quiz timers to remove time pressure. Dyslexia letter-spacing is applied, and distracting animations are turned off.";
+    } else if (activeMode === 'physical') {
+      return "<strong>Physical / Keyboard Navigation mode active:</strong> Elements are optimized for sequential keyboard focus. Enhanced focus indicators (glowing rings) are active around all interactive links, fields, and buttons.";
     }
     return '';
   };
 
   const recommendation = getRecommendation();
   const currentMode = preferences.accessibility_mode || 'standard';
+  const btnStyle = currentMode === 'visual' ? { minHeight: '48px', minWidth: '48px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } : {};
 
   return (
     <div className="main-content">
       {/* Personalized recommendation banner */}
       {recommendation && (
         <div className="rec-banner glass-card" role="alert" aria-live="polite">
-          <span className="rec-icon">💡</span>
+          {currentMode !== 'cognitive' && <span className="rec-icon">💡</span>}
           <div className="rec-body">
             <h2>Mode Accommodations Applied</h2>
             <p dangerouslySetInnerHTML={{ __html: recommendation }} />
@@ -162,12 +174,18 @@ function Dashboard({ user, onLogout, navigateTo }) {
               className={`btn ${rulerActive ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setRulerActive(!rulerActive)}
               aria-pressed={rulerActive}
+              style={btnStyle}
             >
               🎚️ {rulerActive ? 'Disable Reading Ruler' : 'Enable Reading Ruler'}
             </button>
           )}
-          <button className="btn btn-secondary" onClick={() => navigateTo('help')} aria-label="Open accessibility help documentation">
-            Help Center
+          <button 
+            className="btn btn-secondary" 
+            onClick={() => navigateTo('help')} 
+            aria-label="Open accessibility help documentation"
+            style={btnStyle}
+          >
+            <span>Help Center</span>
           </button>
         </div>
       </section>
@@ -185,9 +203,10 @@ function Dashboard({ user, onLogout, navigateTo }) {
             className="btn btn-primary"
             onClick={() => navigateTo('classroom', { courseId: enrolled[0].id })}
             aria-label={`Continue studying ${enrolled[0].title}`}
+            style={btnStyle}
           >
             <span>Continue Learning</span>
-            <ArrowRight size={16} />
+            {currentMode !== 'cognitive' && <ArrowRight size={16} />}
           </button>
         </section>
       )}
@@ -195,7 +214,47 @@ function Dashboard({ user, onLogout, navigateTo }) {
       {/* MAIN DASHBOARD DUAL PANE */}
       <div className="dash-grid">
         {/* Left pane: Course curriculum tabs */}
-        <section aria-label="Learning Catalog and Course boards">
+        <section aria-label="Learning Catalog and Course boards" style={{ display: 'flex', flexDirection: 'column' }}>
+          
+          {/* Notifications Panel */}
+          {notifications.length > 0 && (
+            <div 
+              className="glass-card p-4"
+              style={{ 
+                marginBottom: '2rem', 
+                borderLeft: '4px solid var(--accent)',
+                order: currentMode === 'hearing' ? -1 : 'initial',
+                background: '#fff'
+              }}
+            >
+              <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                {currentMode !== 'cognitive' && <span>🔔</span>}
+                <span>Latest System Announcements</span>
+              </h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {notifications.slice(0, 3).map(n => (
+                  <div key={n.id} style={{ paddingBottom: '0.5rem', borderBottom: '1px solid var(--line)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                      <strong style={{ fontSize: '0.95rem' }}>{n.title}</strong>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
+                        {new Date(n.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: '0.88rem', color: 'var(--muted)', marginTop: '0.2rem' }}>{n.message}</p>
+                  </div>
+                ))}
+              </div>
+              <button 
+                type="button"
+                className="btn btn-secondary btn-sm" 
+                onClick={() => navigateTo('notifications')}
+                style={{ ...btnStyle, marginTop: '0.75rem' }}
+              >
+                View All Notifications
+              </button>
+            </div>
+          )}
+
           <nav className="tab-nav" aria-label="Dashboard views">
             <button 
               className={`tab-btn ${activeTab === 'learning' ? 'active' : ''}`}
@@ -222,13 +281,13 @@ function Dashboard({ user, onLogout, navigateTo }) {
               {activeTab === 'learning' && (
                 <div>
                   {enrolled.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '4rem 2rem' }} className="glass-card">
-                      <BookOpen size={48} style={{ color: 'var(--muted)', marginBottom: '1rem' }} />
+                    <div style={{ textAlign: 'center', padding: '4rem 2rem' }} className="glass-card" style={{ background: '#fff' }}>
+                      {currentMode !== 'cognitive' && <BookOpen size={48} style={{ color: 'var(--muted)', marginBottom: '1rem' }} />}
                       <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>No active enrollments</h3>
                       <p style={{ color: 'var(--muted)', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
                         Enroll in courses using the catalog tab to begin learning with adaptive tools.
                       </p>
-                      <button className="btn btn-primary" onClick={() => setActiveTab('catalog')}>
+                      <button className="btn btn-primary" onClick={() => setActiveTab('catalog')} style={btnStyle}>
                         Browse Catalog
                       </button>
                     </div>
@@ -240,6 +299,11 @@ function Dashboard({ user, onLogout, navigateTo }) {
                             <div className="card-header-block">
                               <span className="course-code">{c.course_code || 'GEN-101'}</span>
                               <span className="badge-a11y-pill badge-hearing" style={{ margin: 0, fontSize: '0.65rem' }}>Active</span>
+                              {currentMode === 'hearing' && (
+                                <span className="badge-a11y-pill badge-vision" style={{ margin: 0, fontSize: '0.65rem', background: 'var(--success-light)', color: 'var(--success)', borderColor: 'var(--success)' }}>
+                                  CC Available
+                                </span>
+                              )}
                             </div>
                             <h3 className="course-title">{c.title}</h3>
                             <p className="course-desc">
@@ -249,11 +313,11 @@ function Dashboard({ user, onLogout, navigateTo }) {
                           <button 
                             className="btn btn-primary btn-full"
                             onClick={() => navigateTo('classroom', { courseId: c.id })}
-                            style={{ marginTop: '1.5rem' }}
+                            style={{ ...btnStyle, marginTop: '1.5rem' }}
                             aria-label={`Enter classroom for course: ${c.title}`}
                           >
                             <span>Enter Classroom</span>
-                            <ArrowRight size={16} />
+                            {currentMode !== 'cognitive' && <ArrowRight size={16} />}
                           </button>
                         </article>
                       ))}
@@ -267,13 +331,13 @@ function Dashboard({ user, onLogout, navigateTo }) {
                 <div>
                   <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
                     <div style={{ position: 'relative', flex: 1 }}>
-                      <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
+                      {currentMode !== 'cognitive' && <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />}
                       <input 
                         type="text" 
                         id="search-input"
                         className="form-control" 
                         placeholder="Search courses..." 
-                        style={{ paddingLeft: '2.5rem' }}
+                        style={{ paddingLeft: currentMode === 'cognitive' ? '1rem' : '2.5rem' }}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         aria-label="Search course catalogue input"
@@ -295,6 +359,11 @@ function Dashboard({ user, onLogout, navigateTo }) {
                               <div className="card-header-block">
                                 <span className="course-code">{c.course_code || 'CSC-201'}</span>
                                 <span className="badge-a11y-pill badge-vision" style={{ margin: 0, fontSize: '0.65rem' }}>A11y Verified</span>
+                                {currentMode === 'hearing' && (
+                                  <span className="badge-a11y-pill badge-vision" style={{ margin: 0, fontSize: '0.65rem', background: 'var(--success-light)', color: 'var(--success)', borderColor: 'var(--success)' }}>
+                                    CC Available
+                                  </span>
+                                )}
                               </div>
                               <h3 className="course-title">{c.title}</h3>
                               <p className="course-desc">
@@ -305,16 +374,16 @@ function Dashboard({ user, onLogout, navigateTo }) {
                               <button 
                                 className="btn btn-secondary btn-sm" 
                                 onClick={() => navigateTo('coursedetail', { courseId: c.id })}
-                                style={{ flex: 1 }}
+                                style={{ ...btnStyle, flex: 1 }}
                               >
                                 Info
                               </button>
                               {isEnrolled ? (
-                                <button className="btn btn-secondary btn-sm" disabled style={{ opacity: 0.8, flex: 1 }}>
+                                <button className="btn btn-secondary btn-sm" disabled style={{ ...btnStyle, opacity: 0.8, flex: 1 }}>
                                   <span>Enrolled</span>
                                 </button>
                               ) : (
-                                <button className="btn btn-primary btn-sm" onClick={() => handleEnroll(c.id)} style={{ flex: 1 }}>
+                                <button className="btn btn-primary btn-sm" onClick={() => handleEnroll(c.id)} style={{ ...btnStyle, flex: 1 }}>
                                   <span>Enroll</span>
                                 </button>
                               )}
@@ -334,7 +403,7 @@ function Dashboard({ user, onLogout, navigateTo }) {
         <aside id="preferences-hub" aria-label="Accessibility settings panel">
           <form onSubmit={handleSavePreferences} className="feature-item a11y-sidebar glass-card">
             <h2 className="sidebar-title">
-              <Sliders size={20} style={{ color: 'var(--brand)' }} />
+              {currentMode !== 'cognitive' && <Sliders size={20} style={{ color: 'var(--brand)' }} />}
               <span>Accessibility Hub</span>
             </h2>
 
@@ -352,6 +421,7 @@ function Dashboard({ user, onLogout, navigateTo }) {
                 <option value="visual">Visual Impairment</option>
                 <option value="hearing">Deaf / Hard of Hearing</option>
                 <option value="cognitive">Cognitive Disability</option>
+                <option value="physical">Physical Disability</option>
               </select>
             </div>
 
@@ -440,7 +510,7 @@ function Dashboard({ user, onLogout, navigateTo }) {
                   gap: '0.25rem'
                 }}
               >
-                {prefStatus.includes('failed') ? <ShieldAlert size={16} /> : <CheckCircle2 size={16} />}
+                {currentMode !== 'cognitive' && (prefStatus.includes('failed') ? <ShieldAlert size={16} /> : <CheckCircle2 size={16} />)}
                 <span>{prefStatus}</span>
               </div>
             )}
@@ -449,7 +519,7 @@ function Dashboard({ user, onLogout, navigateTo }) {
               className="btn btn-primary btn-full" 
               type="submit"
               disabled={savingPrefs}
-              style={{ marginTop: '1rem' }}
+              style={{ ...btnStyle, marginTop: '1rem', width: '100%' }}
             >
               {savingPrefs ? 'Updating Hub...' : 'Save Preferences'}
             </button>

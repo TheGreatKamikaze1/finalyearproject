@@ -1003,3 +1003,25 @@ body.ruler-active .reading-ruler {
 
 .status-live { background-color: var(--success-light); color: var(--success); border: 1px solid hsl(142, 60%, 80%); }
 .status-draft { background-color: var(--warning-light); color: var(--warning); border: 1px solid hsl(38, 90%, 80%); }
+
+/* Accessibility Mode Layout Adapters */
+
+/* Cognitive Mode: Simplified grid structure */
+body.mode-cognitive .dash-grid,
+body.mode-cognitive .card-grid {
+  grid-template-columns: 1fr !important;
+}
+
+/* Physical Mode: High-contrast focus rings for keyboard users */
+body.mode-physical *:focus,
+body.mode-physical button:focus,
+body.mode-physical select:focus,
+body.mode-physical input:focus,
+body.mode-physical a:focus,
+body.mode-physical [tabindex="0"]:focus,
+body.mode-physical label:focus {
+  outline: 4px solid var(--focus) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 10px var(--focus) !important;
+}
+
